@@ -1,5 +1,3 @@
-import base64
-from rest_framework.views import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from codingclub_api.apps.users.models import User
@@ -25,13 +23,15 @@ class UserApiView(APIView):
     def get_serializer():
         return UserSerializer
 
-    def get(self, request):
+    def get(self, request, pk=None):
         try:
-            data = User.objects.all()
             serializer = self.get_serializer()
-            store_image_get_url("test", "one")
-            serializer = serializer(data=data, many=True)
-            serializer.is_valid()
+            if pk is not None:
+                queryset = User.objects.get(user_id=pk)
+                serializer = serializer(queryset)
+                return success_response(status=status.HTTP_200_OK, data=serializer.data)
+            queryset = User.objects.all()
+            serializer = serializer(queryset, many=True)
             return success_response(status=status.HTTP_200_OK, data=serializer.data)
         except Exception as ex:
             raise ex
@@ -51,3 +51,23 @@ class UserApiView(APIView):
             return success_response(status=status.HTTP_200_OK, data=serializer.validated_data)
         except Exception as ex:
             raise ex
+
+    def patch(self, request, pk):
+        try:
+            user = User.objects.get(user_id=pk)
+            serializer = self.get_serializer()
+            serializer = serializer(user, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return success_response(status=status.HTTP_200_OK, data=serializer.validated_data)
+        except Exception as ex:
+            raise ex
+
+    def edit_profile_pic(self, request):
+        pass
+
+    def dispatch(self, request, *args, **kwargs):
+        # override the dispatch method to handle the custom view
+        if request.method.lower() == 'edit_profile_pic':
+            return self.edit_profile_pic(request)
+        return super().dispatch(request, *args, **kwargs)

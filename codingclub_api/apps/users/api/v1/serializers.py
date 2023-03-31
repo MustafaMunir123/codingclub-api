@@ -9,3 +9,6 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = '__all__'
 
+    def update(self, instance, validated_data):
+        user = User.objects.filter(user_id=instance.user_id).update(**validated_data)
+        return user
