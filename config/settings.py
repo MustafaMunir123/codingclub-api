@@ -35,7 +35,7 @@ LOCAL_APPS = [
 ]
 
 THIRDPARTY_APPS = [
-    "phonenumber_field",
+    "phonenumber_field"
 ]
 
 INSTALLED_APPS = [
@@ -60,6 +60,10 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "config.urls"
+
+REST_FRAMEWORK = {
+    "EXCEPTION_HANDLER": "codingclub_api.apps.utils.custom_exception_handler"
+}
 
 TEMPLATES = [
     {
