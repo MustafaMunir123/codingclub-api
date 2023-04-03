@@ -1,9 +1,10 @@
 from rest_framework.views import APIView
 from rest_framework import status
 from codingclub_api.apps.users.models import User
-from codingclub_api.apps.users.services import store_image_get_url
+from codingclub_api.apps.services import (store_image_get_url, delete_image_from_url)
+from codingclub_api.apps.users.constants import PROFILE_PIC_ICON
 from codingclub_api.apps.users.api.v1.serializers import UserSerializer
-from rest_framework.permissions import IsAuthenticated, BasePermission
+from rest_framework.permissions import (IsAuthenticated, BasePermission)
 from codingclub_api.apps.utils import success_response
 # Create your views here.
 
@@ -23,6 +24,15 @@ class UserApiView(APIView):
     def get_serializer():
         return UserSerializer
 
+    @staticmethod
+    def update_and_delete_pic(picture, old_url):
+        if old_url != PROFILE_PIC_ICON:
+            path = old_url.split('.com/o/', 1)[1].replace('%2F', '/').replace('%20', ' ')
+            path = path.split('?alt')[0]
+            delete_image_from_url(path)
+        image_url = store_image_get_url(picture[0], "profile_pic/")
+        return image_url
+
     def get(self, request, pk=None):
         try:
             serializer = self.get_serializer()
@@ -38,16 +48,18 @@ class UserApiView(APIView):
 
     def post(self, request):
         try:
-            image_file = request.FILES["profile_pic"]
-            request.data.pop("profile_pic")
+            image_file = ''
+            if request.data['profile_pic'] != '':
+                image_file = request.data.pop("profile_pic")
             serializer = self.get_serializer()
             serializer = serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            image_url = store_image_get_url(image_file, "profile_pic/")
-            user = User.objects.get(email=request.data["email"])
-            user.profile_pic = image_url
-            user.save()
+            if image_file:
+                image_url = store_image_get_url(image_file[0], "profile_pic/")
+                user = User.objects.get(email=request.data["email"])
+                user.profile_pic = image_url
+                user.save()
             return success_response(status=status.HTTP_200_OK, data=serializer.validated_data)
         except Exception as ex:
             raise ex
@@ -56,6 +68,9 @@ class UserApiView(APIView):
         try:
             user = User.objects.get(user_id=pk)
             serializer = self.get_serializer()
+            if request.data['profile_pic'] != '':
+                profile_pic = request.data.pop('profile_pic')
+                request.data['profile_pic'] = self.update_and_delete_pic(picture=profile_pic, old_url=user.profile_pic)
             serializer = serializer(user, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -63,11 +78,16 @@ class UserApiView(APIView):
         except Exception as ex:
             raise ex
 
-    def edit_profile_pic(self, request):
-        pass
+    @staticmethod
+    def delete(request, pk):
+        try:
+            user = User.objects.get(user_id=pk)
+            email = user.email
+            user.delete()
+            return success_response(status=status.HTTP_200_OK, data=f"User deleted succesfully with email {email}")
+        except Exception as ex:
+            raise ex
 
-    def dispatch(self, request, *args, **kwargs):
-        # override the dispatch method to handle the custom view
-        if request.method.lower() == 'edit_profile_pic':
-            return self.edit_profile_pic(request)
-        return super().dispatch(request, *args, **kwargs)
+
+
+
