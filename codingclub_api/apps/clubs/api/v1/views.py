@@ -136,9 +136,6 @@ class ClubMemberApiView(APIView):
             if user.is_lead:
                 lead_club = Club.objects.get(lead_user=user)
                 return success_response(status=status.HTTP_200_OK, data=f"User with email: {user.email} is leading  {lead_club.name}, so user cannot join any other clubs.")
-            # user, club = model_to_dict(user), model_to_dict(club)
-            # request.data["user"], request.data["club"] = user, club
-            # print(user)
             serializer = self.get_serializer()
             serializer = serializer(data=request.data)
             serializer.is_valid(raise_exception=True)

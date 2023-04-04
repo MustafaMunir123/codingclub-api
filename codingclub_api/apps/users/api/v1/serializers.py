@@ -13,6 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
     def update(self, instance, validated_data):
+        # print(instance)
         user = User.objects.filter(user_id=instance.user_id).update(**validated_data)
         return user
 

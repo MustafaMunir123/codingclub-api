@@ -26,9 +26,16 @@ class ClubSerializer(serializers.Serializer):
     category = CategorySerializer(many=True, read_only=True)
     domain = ClubDomainSerializer(many=True, read_only=True)
     role = ClubRoleSerializer(many=True, read_only=True)
+    is_accepted = serializers.BooleanField(default=False, allow_null=True)
+    rejected = serializers.BooleanField(default=False, allow_null=True)
 
     def create(self, validated_data):
         club = Club.objects.create(**validated_data)
+        return club
+
+    def update(self, instance, validated_data):
+        # print(f"{instance}-------------------------")
+        club = Club.objects.filter(id=instance.id).update(**validated_data)
         return club
 
 

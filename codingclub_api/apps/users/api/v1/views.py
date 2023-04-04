@@ -130,9 +130,17 @@ class AdminApiView(APIView):
         if "user_acceptance" in request.path:
             pass
 
-    @staticmethod
-    def put(request, pk):
-        club = Club.objects.get(id=pk)
-        club.is_accepted = True
-        club.save()
-        return success_response(status=status.HTTP_200_OK, data=f"Club '{club.name}' registered successfully")
+    def patch(self, request, pk):
+        try:
+            msg = ''
+            club = Club.objects.get(id=pk)
+            serializer = self.get_club_serializer()
+            serializer = serializer(club, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            msg = f"Club '{club.name}' registered successfully"
+            if "rejected" in serializer.validated_data:
+                msg = f"Club creation request rejected for {club.name}"
+            return success_response(status=status.HTTP_200_OK, data=msg)
+        except Exception as ex:
+            raise ex
