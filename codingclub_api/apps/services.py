@@ -1,6 +1,7 @@
 import os
 import uuid
 
+import firebase_admin
 import pyrebase
 import ast
 from dotenv import load_dotenv
@@ -26,3 +27,9 @@ def store_image_get_url(image_file, path: str):
     image_url = storage.child("coding_club-api/media/" + path + image_file.name).get_url(token=None)
     print(image_url)
     return image_url
+
+
+def delete_image_from_url(url_path):
+    # url=storage.child(url_path).get_url(None)
+    storage.delete(url_path, token=user["idToken"])
+
