@@ -1,5 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist, FieldError
-from django.db import IntegrityError
+from django.db import IntegrityError, OperationalError
 from rest_framework import status
 from rest_framework.views import Response, exception_handler
 
@@ -15,7 +15,8 @@ def custom_exception_handler(exc, context):
     if response is not None:
         response.data = error_response(exc.args)
         return response.data
-    elif isinstance(exc, FieldError) or isinstance(exc, AttributeError) or isinstance(exc, TypeError) or isinstance(exc, AssertionError):
+    elif isinstance(exc, FieldError) or isinstance(exc, AttributeError) or isinstance(exc, TypeError) or \
+            isinstance(exc, AssertionError) or isinstance(exc, OperationalError):
         response = error_response(str(exc))
     elif isinstance(exc, IntegrityError):
         response = error_response(str(exc).strip("\n").split("DETAIL:  ")[-1])

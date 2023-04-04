@@ -43,6 +43,8 @@ class Club(models.Model):
     role = models.ManyToManyField(ClubRole, related_name='roles')
     domain = models.ManyToManyField(ClubDomain, related_name='domains')
     category = models.ManyToManyField(Category, related_name="category")
+    is_accepted = models.BooleanField(default=False, null=True)
+    rejected = models.BooleanField(default=False, null=True)
 
     def __str__(self):
         return self.name

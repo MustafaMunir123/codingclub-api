@@ -1,11 +1,16 @@
+from django.forms import model_to_dict
 from rest_framework.views import APIView
 from rest_framework import status
 from codingclub_api.apps.users.models import User
 from codingclub_api.apps.services import (store_image_get_url, delete_image_from_url)
 from codingclub_api.apps.users.constants import PROFILE_PIC_ICON
+from codingclub_api.apps.clubs.models import Club
 from codingclub_api.apps.users.api.v1.serializers import UserSerializer
+from codingclub_api.apps.clubs.api.v1.serializers import ClubSerializer
 from rest_framework.permissions import (IsAuthenticated, BasePermission)
 from codingclub_api.apps.utils import success_response
+
+
 # Create your views here.
 
 
@@ -89,5 +94,45 @@ class UserApiView(APIView):
             raise ex
 
 
+class AdminApiView(APIView):
 
+    @staticmethod
+    def get_serializer():
+        return UserSerializer
 
+    @staticmethod
+    def get_club_serializer():
+        return ClubSerializer
+
+    def get_all_clubs(self):
+        try:
+            club_data = Club.objects.filter(is_accepted=False, rejected=False)
+            print(club_data)
+            serializer = self.get_club_serializer()
+            serializer = serializer(club_data, many=True)
+            return success_response(status=status.HTTP_200_OK, data=serializer.data)
+        except Exception as ex:
+            raise ex
+
+    def get_admin_users(self):
+        users = User.objects.filter(is_admin=True)
+        serializer = self.get_serializer()
+        serializer = serializer(users, many=True)
+        return success_response(status=status.HTTP_200_OK, data=serializer.data)
+
+    def get(self, request):
+        if "get_all_clubs" in request.path:
+            return self.get_all_clubs()
+        elif "get_admin_users" in request.path:
+            return self.get_admin_users()
+
+    def post(self, request):
+        if "user_acceptance" in request.path:
+            pass
+
+    @staticmethod
+    def put(request, pk):
+        club = Club.objects.get(id=pk)
+        club.is_accepted = True
+        club.save()
+        return success_response(status=status.HTTP_200_OK, data=f"Club '{club.name}' registered successfully")
