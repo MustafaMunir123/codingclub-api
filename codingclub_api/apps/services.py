@@ -1,7 +1,6 @@
 import os
 import uuid
 
-import firebase_admin
 import pyrebase
 import ast
 from dotenv import load_dotenv

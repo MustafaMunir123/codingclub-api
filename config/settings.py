@@ -32,7 +32,8 @@ ALLOWED_HOSTS = []
 
 LOCAL_APPS = [
     "codingclub_api.apps.users",
-    "codingclub_api.apps.clubs"
+    "codingclub_api.apps.clubs",
+    "codingclub_api.apps.posts"
 ]
 
 THIRDPARTY_APPS = [
