@@ -1,5 +1,5 @@
 from django.urls import path
-from codingclub_api.apps.users.api.v1.views import UserApiView, AdminApiView
+from codingclub_api.apps.users.api.v1.views import UserApiView, AdminApiView, UserUtilsApiView
 
 
 urlpatterns = [
@@ -9,4 +9,5 @@ urlpatterns = [
     path("v1/get_club_requests/", AdminApiView.as_view()),
     path("v1/get_admin_users/", AdminApiView.as_view()),
     path("v1/get_rejected_clubs/", AdminApiView.as_view()),
+    path("v1/sign_in/", UserUtilsApiView.as_view()),
 ]

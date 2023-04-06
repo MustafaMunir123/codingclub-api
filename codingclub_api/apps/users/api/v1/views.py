@@ -2,6 +2,7 @@ from django.forms import model_to_dict
 from rest_framework.views import APIView
 from rest_framework import status
 from codingclub_api.apps.users.models import User
+from codingclub_api.apps.email_service import  send_email #, EmailService
 from codingclub_api.apps.services import (store_image_get_url, delete_image_from_url)
 from codingclub_api.apps.users.constants import PROFILE_PIC_ICON
 from codingclub_api.apps.clubs.models import Club
@@ -154,3 +155,35 @@ class AdminApiView(APIView):
             return success_response(status=status.HTTP_200_OK, data=msg)
         except Exception as ex:
             raise ex
+
+class UserUtilsApiView(APIView):
+    @staticmethod
+    def get_serializer():
+        return UserSerializer
+
+    def sign_in(self, request):
+        check = 0
+        try:
+            # EmailService.send_email(subject="D-Sync User Account", to="munir4303324@cloud.neduet.edu.pk", to_name="Test User", message="This is a test email")
+            user = User.objects.get(email=request.data["email"])
+            check = 1
+            user = User.objects.get(password=request.data["password"], email=request.data["email"])
+            check = 2
+            serializer = self.get_serializer()
+            serializer = serializer(user)
+            body = f"Account created successfully for user '{serializer.data['first_name']} {serializer.data['last_name']}'"
+            try:
+                send_email(f"mustafamunir10@gmail.com", f"D-Sync Account for User: {serializer.data['first_name']}", body)
+            except Exception as ex:
+                raise ex
+            return success_response(status=status.HTTP_200_OK, data=serializer.data)
+        except Exception as ex:
+            if check == 0:
+                raise ValueError("Incorrect Email")
+            elif check == 1:
+                raise ValueError("Incorrect Password")
+            raise ex
+
+    def post(self, request):
+        if "sign_in" in request.path:
+            return self.sign_in(request)
