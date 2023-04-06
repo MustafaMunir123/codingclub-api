@@ -123,7 +123,7 @@ class AdminApiView(APIView):
             raise ex
 
     def get_admin_users(self):
-        users = User.objects.filter(is_admin=True)
+        users = User.objects.filter(is_admin=True, is_superuser=False)
         serializer = self.get_serializer()
         serializer = serializer(users, many=True)
         return success_response(status=status.HTTP_200_OK, data=serializer.data)
