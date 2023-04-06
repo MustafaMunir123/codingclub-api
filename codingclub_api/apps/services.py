@@ -14,13 +14,17 @@ email = os.getenv("FB_EMAIL")
 password = os.getenv("FB_PASSWORD")
 
 # Setting up Firebase storage
-firebase = pyrebase.initialize_app(config)
-auth = firebase.auth()
-user = auth.sign_in_with_email_and_password(email=email, password=password)
-storage = firebase.storage()
+# try:
+#
+# except Exception as ex:
+#     raise ValueError(f"Error: {ex}")
 
 
 def store_image_get_url(image_file, path: str):
+    firebase = pyrebase.initialize_app(config)
+    auth = firebase.auth()
+    user = auth.sign_in_with_email_and_password(email=email, password=password)
+    storage = firebase.storage()
     image_file.name = f"{uuid.uuid4()} _ {image_file.name}"
     storage.child("coding_club-api/media/" + path + image_file.name).put(image_file, token=user["idToken"])
     image_url = storage.child("coding_club-api/media/" + path + image_file.name).get_url(token=None)

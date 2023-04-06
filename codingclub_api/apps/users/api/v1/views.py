@@ -2,7 +2,7 @@ from django.forms import model_to_dict
 from rest_framework.views import APIView
 from rest_framework import status
 from codingclub_api.apps.users.models import User
-from codingclub_api.apps.email_service import EmailService
+from codingclub_api.apps.email_service import  send_email #, EmailService
 from codingclub_api.apps.services import (store_image_get_url, delete_image_from_url)
 from codingclub_api.apps.users.constants import PROFILE_PIC_ICON
 from codingclub_api.apps.clubs.models import Club
@@ -124,7 +124,7 @@ class AdminApiView(APIView):
             raise ex
 
     def get_admin_users(self):
-        users = User.objects.filter(is_admin=True)
+        users = User.objects.filter(is_admin=True, is_superuser=False)
         serializer = self.get_serializer()
         serializer = serializer(users, many=True)
         return success_response(status=status.HTTP_200_OK, data=serializer.data)
@@ -165,19 +165,20 @@ class UserUtilsApiView(APIView):
     def sign_in(self, request):
         check = 0
         try:
-            # send_email("mustafamunir10@gmail.com", "Test D-Sync", "This is a test email")
-            EmailService.send_email(subject="D-Sync User Account", to="munir4303324@cloud.neduet.edu.pk", to_name="Test User", message="This is a test email")
+            # EmailService.send_email(subject="D-Sync User Account", to="munir4303324@cloud.neduet.edu.pk", to_name="Test User", message="This is a test email")
             user = User.objects.get(email=request.data["email"])
             check = 1
             user = User.objects.get(password=request.data["password"], email=request.data["email"])
+            check = 2
             serializer = self.get_serializer()
             serializer = serializer(user)
-            return success_response(status=status.HTTP_200_OK, data=serializer.data)
+            body = f"Account created successfully for user '{serializer.data['first_name']} {serializer.data['last_name']}'"
+            send_email(f"mustafamunir10@gmail.com", f"D-Sync Account for User: {serializer.data['first_name']}", body)
         except Exception as ex:
             if check == 0:
-                raise ex
+                raise ValueError("Incorrect Email")
             elif check == 1:
-                raise ex
+                raise ValueError("Incorrect Password")
             raise ex
 
     def post(self, request):

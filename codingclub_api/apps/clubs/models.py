@@ -75,8 +75,17 @@ class ClubRule(models.Model):
 class ClubEvent(models.Model):
     name = models.CharField(max_length=30, null=False, blank=False)
     description = models.CharField(max_length=200, null=False, blank=False)
-    club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name="event_club")
+    of_club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name="of_club")
+    start_date = models.DateField(default="2023-3-4")
+    end_date = models.DateField(default="2023-3-4")
 
     def __str__(self):
-        return f"{self.name}  {self.club}"
+        return f"{self.name}  {self.of_club}"
 
+
+class EventGoing(models.Model):
+    event = models.OneToOneField(ClubEvent, on_delete=models.CASCADE, related_name="event")
+    going = models.ManyToManyField(User, related_name="going")
+
+    def __str__(self):
+        return self.event
