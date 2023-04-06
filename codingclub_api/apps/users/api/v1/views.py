@@ -156,6 +156,7 @@ class AdminApiView(APIView):
         except Exception as ex:
             raise ex
 
+
 class UserUtilsApiView(APIView):
     @staticmethod
     def get_serializer():
@@ -172,11 +173,7 @@ class UserUtilsApiView(APIView):
             serializer = self.get_serializer()
             serializer = serializer(user)
             body = f"Account created successfully for user '{serializer.data['first_name']} {serializer.data['last_name']}'"
-            try:
-                send_email(f"mustafamunir10@gmail.com", f"D-Sync Account for User: {serializer.data['first_name']}", body)
-            except Exception as ex:
-                raise ex
-            return success_response(status=status.HTTP_200_OK, data=serializer.data)
+            send_email(f"mustafamunir10@gmail.com", f"D-Sync Account for User: {serializer.data['first_name']}", body)
         except Exception as ex:
             if check == 0:
                 raise ValueError("Incorrect Email")
