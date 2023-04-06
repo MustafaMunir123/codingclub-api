@@ -104,10 +104,18 @@ class AdminApiView(APIView):
     def get_club_serializer():
         return ClubSerializer
 
-    def get_all_clubs(self):
+    def get_club_requests(self):
         try:
             club_data = Club.objects.filter(is_accepted=False, rejected=False)
-            print(club_data)
+            serializer = self.get_club_serializer()
+            serializer = serializer(club_data, many=True)
+            return success_response(status=status.HTTP_200_OK, data=serializer.data)
+        except Exception as ex:
+            raise ex
+
+    def get_rejected_clubs(self):
+        try:
+            club_data = Club.objects.filter(rejected=True)
             serializer = self.get_club_serializer()
             serializer = serializer(club_data, many=True)
             return success_response(status=status.HTTP_200_OK, data=serializer.data)
@@ -121,10 +129,12 @@ class AdminApiView(APIView):
         return success_response(status=status.HTTP_200_OK, data=serializer.data)
 
     def get(self, request):
-        if "get_all_clubs" in request.path:
-            return self.get_all_clubs()
+        if "get_club_requests" in request.path:
+            return self.get_club_requests()
         elif "get_admin_users" in request.path:
             return self.get_admin_users()
+        elif "get_rejected_clubs" in request.path:
+            return self.get_rejected_clubs()
 
     def post(self, request):
         if "user_acceptance" in request.path:
