@@ -5,16 +5,21 @@ from rest_framework.views import (
     APIView,
     status,
 )
-from rest_framework.viewsets import ModelViewSet
-from rest_framework.decorators import action
 from codingclub_api.apps.utils import success_response
 from codingclub_api.apps.clubs.models import (
     Club,
     Category,
     ClubDomain,
-    ClubRole
+    ClubRole,
+    ClubMember
 )
-from codingclub_api.apps.clubs.api.v1.serializers import ClubSerializer, ClubMemberSerializer
+from codingclub_api.apps.clubs.api.v1.serializers import (
+    ClubSerializer,
+    ClubMemberSerializer,
+    ClubDomainSerializer,
+    CategorySerializer,
+    ClubRoleSerializer
+)
 from codingclub_api.apps.services import store_image_get_url
 from codingclub_api.apps.users.models import User
 from codingclub_api.apps.users.api.v1.serializers import UserSerializer
@@ -135,7 +140,14 @@ class ClubMemberApiView(APIView):
             user, club = User.objects.get(user_id=user_id), Club.objects.get(id=club_id)
             if user.is_lead:
                 lead_club = Club.objects.get(lead_user=user)
-                return success_response(status=status.HTTP_200_OK, data=f"User with email: {user.email} is leading  {lead_club.name}, so user cannot join any other clubs.")
+                return success_response(status=status.HTTP_400_BAD_REQUEST, success=False, data=f"User with email: {user.email} is leading  {lead_club.name}, so user cannot join any other clubs.")
+
+            member_of_clubs = ClubMember.objects.filter(user=user)
+            for club_member in member_of_clubs:
+                if club_member.club == club:
+                    # TODO: implement failure_response
+                    return success_response(status=status.HTTP_400_BAD_REQUEST, success=False, data=f"Already a part of {club}")
+
             serializer = self.get_serializer()
             serializer = serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
@@ -144,6 +156,51 @@ class ClubMemberApiView(APIView):
         except Exception as ex:
             raise ex
         pass
+
+
+class ClubDomainsApiView(APIView):
+    @staticmethod
+    def get_serializer():
+        return ClubDomainSerializer
+
+    def get(self, request):
+        try:
+            domains = ClubDomain.objects.all()
+            serializer = self.get_serializer()
+            serializer = serializer(domains, many=True)
+            return success_response(status=status.HTTP_200_OK, data=serializer.data)
+        except Exception as ex:
+            raise ex
+
+
+class CategoryApiView(APIView):
+    @staticmethod
+    def get_serializer():
+        return CategorySerializer
+
+    def get(self, request):
+        try:
+            categories = Category.objects.all()
+            serializer = self.get_serializer()
+            serializer = serializer(categories, many=True)
+            return success_response(status=status.HTTP_200_OK, data=serializer.data)
+        except Exception as ex:
+            raise ex
+
+
+class ClubRoleApiView(APIView):
+    @staticmethod
+    def get_serializer():
+        return ClubRoleSerializer
+
+    def get(self, request):
+        try:
+            roles = ClubRole.objects.all()
+            serializer = self.get_serializer()
+            serializer = serializer(roles, many=True)
+            return success_response(status=status.HTTP_200_OK, data=serializer.data)
+        except Exception as ex:
+            raise ex
 
 
 

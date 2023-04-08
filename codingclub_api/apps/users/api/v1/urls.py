@@ -10,4 +10,6 @@ urlpatterns = [
     path("v1/get_admin_users/", AdminApiView.as_view()),
     path("v1/get_rejected_clubs/", AdminApiView.as_view()),
     path("v1/sign_in/", UserUtilsApiView.as_view()),
+    path("v1/generate_otp/", UserUtilsApiView.as_view()),
+    path("v1/validate_otp/", UserUtilsApiView.as_view()),
 ]
