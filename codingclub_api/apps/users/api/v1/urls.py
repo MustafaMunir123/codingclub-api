@@ -15,5 +15,8 @@ urlpatterns = [
     path("v1/get_club_requests/", AdminApiView.as_view()),
     path("v1/get_admin_users/", AdminApiView.as_view()),
     path("v1/get_rejected_clubs/", AdminApiView.as_view()),
-    path("v1/create_admin_user/", AdminApiView.as_view())
+    path("v1/create_admin_user/", AdminApiView.as_view()),
+    path("v1/add_category/", AdminApiView.as_view()),
+    path("v1/add_domain/", AdminApiView.as_view()),
+    path("v1/add_role/", AdminApiView.as_view()),
 ]

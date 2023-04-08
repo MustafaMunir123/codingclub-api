@@ -6,7 +6,7 @@ from codingclub_api.apps.users.models import User
 
 class Category(models.Model):
     objects = None
-    tags = models.CharField(max_length=40)
+    tags = models.CharField(max_length=40, unique=True)
 
     def __str__(self):
         return self.tags
@@ -17,7 +17,7 @@ class Category(models.Model):
 
 class ClubDomain(models.Model):
     objects = None
-    domain = models.CharField(max_length=40)
+    domain = models.CharField(max_length=40, unique=True)
 
     def __str__(self):
         return self.domain
@@ -25,7 +25,7 @@ class ClubDomain(models.Model):
 
 class ClubRole(models.Model):
     objects = None
-    role = models.CharField(max_length=40)
+    role = models.CharField(max_length=40, unique=True)
 
     def __str__(self):
         return self.role

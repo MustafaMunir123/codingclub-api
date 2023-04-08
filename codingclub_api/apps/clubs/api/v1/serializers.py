@@ -1,5 +1,11 @@
 from rest_framework import serializers
-from codingclub_api.apps.clubs.models import Club, ClubMember
+from codingclub_api.apps.clubs.models import (
+    Club,
+    ClubMember,
+    Category,
+    ClubDomain,
+    ClubRole
+)
 from codingclub_api.apps.users.models import User
 from codingclub_api.apps.users.api.v1.serializers import UserSerializer
 
@@ -7,13 +13,25 @@ from codingclub_api.apps.users.api.v1.serializers import UserSerializer
 class CategorySerializer(serializers.Serializer):
     tags = serializers.CharField(max_length=40)
 
+    def create(self, validated_data):
+        category = Category.objects.create(**validated_data)
+        return category
+
 
 class ClubRoleSerializer(serializers.Serializer):
     role = serializers.CharField(max_length=40)
 
+    def create(self, validated_data):
+        role = ClubRole.objects.create(**validated_data)
+        return role
+
 
 class ClubDomainSerializer(serializers.Serializer):
     domain = serializers.CharField(max_length=40)
+
+    def create(self, validated_data):
+        domain = ClubDomain.objects.create(**validated_data)
+        return domain
 
 
 class ClubSerializer(serializers.Serializer):
