@@ -175,29 +175,13 @@ class AdminApiView(APIView):
         admin_check = {"is_admin": True}
         print(request.data)
         request.data.update(admin_check)
-        self = UserApiView()
         return UserApiView.post(self=self, request=request)
-        # return success_response(status=status.HTTP_200_OK, data=data)
 
     def post(self, request, pk=None):
         if "reject_club_request" in request.path:
             return self.reject_club_request(request)
         elif "create_admin_user" in request.path:
             return self.create_admin_user(request)
-
-    # def patch(self, request, pk):
-    #     try:
-    #         club = Club.objects.get(id=pk)
-    #         serializer = self.get_club_serializer()
-    #         serializer = serializer(club, data=request.data, partial=True)
-    #         serializer.is_valid(raise_exception=True)
-    #         serializer.save()
-    #         msg = f"Club '{club.name}' registered successfully"
-    #         if "rejected" in serializer.validated_data:
-    #             msg = f"Club creation request rejected for {club.name}"
-    #         return success_response(status=status.HTTP_200_OK, data=msg)
-    #     except Exception as ex:
-    #         raise ex
 
 
 class UserUtilsApiView(APIView):
