@@ -1,7 +1,6 @@
 import uuid
 from django.db import models
 from codingclub_api.apps.users.models import User
-from codingclub_api.apps.clubs.constants import CLUB_ROLES
 # Create your models here.
 
 
@@ -26,7 +25,7 @@ class ClubDomain(models.Model):
 
 class ClubRole(models.Model):
     objects = None
-    role = models.CharField(max_length=40, choices=CLUB_ROLES)
+    role = models.CharField(max_length=40)
 
     def __str__(self):
         return self.role
@@ -61,7 +60,7 @@ class ClubMember(models.Model):
     reason = models.CharField(max_length=300, blank=False, null=False)
 
     def __str__(self):
-        return f"{self.user}"
+        return f"{self.user} {self.club}"
 
 
 class ClubRule(models.Model):

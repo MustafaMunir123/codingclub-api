@@ -1,12 +1,13 @@
 from django.core.exceptions import ObjectDoesNotExist, FieldError
 from django.db import IntegrityError, OperationalError
 from rest_framework import status
+from typing import Any
 from rest_framework.views import Response, exception_handler
 
 
-def success_response(status, data):
+def success_response(status, data, success=True):
     Response.status_code = status
-    msg = {"success": True, "data": data}
+    msg = {"success": success, "data": data}
     return Response(msg)
 
 

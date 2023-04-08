@@ -1,0 +1,58 @@
+[
+{
+    "model": "clubs.clubdomain",
+    "pk": 1,
+    "fields": {
+        "domain": "Graphics"
+    }
+},
+{
+    "model": "clubs.clubdomain",
+    "pk": 2,
+    "fields": {
+        "domain": "Technical"
+    }
+},
+{
+    "model": "clubs.clubdomain",
+    "pk": 3,
+    "fields": {
+        "domain": "Promotions"
+    }
+},
+{
+    "model": "clubs.clubdomain",
+    "pk": 4,
+    "fields": {
+        "domain": "Event Management"
+    }
+},
+{
+    "model": "clubs.clubdomain",
+    "pk": 5,
+    "fields": {
+        "domain": "Media"
+    }
+},
+{
+    "model": "clubs.clubdomain",
+    "pk": 6,
+    "fields": {
+        "domain": "Logistics"
+    }
+},
+{
+    "model": "clubs.clubdomain",
+    "pk": 7,
+    "fields": {
+        "domain": "Videography"
+    }
+},
+{
+    "model": "clubs.clubdomain",
+    "pk": 8,
+    "fields": {
+        "domain": "Photography"
+    }
+}
+]

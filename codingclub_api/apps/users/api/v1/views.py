@@ -1,8 +1,9 @@
+import uuid
 from django.forms import model_to_dict
 from rest_framework.views import APIView
 from rest_framework import status
-from codingclub_api.apps.users.models import User
-from codingclub_api.apps.email_service import  send_email #, EmailService
+from codingclub_api.apps.users.models import User, OTP
+from codingclub_api.apps.email_service import send_email
 from codingclub_api.apps.services import (store_image_get_url, delete_image_from_url)
 from codingclub_api.apps.users.constants import PROFILE_PIC_ICON
 from codingclub_api.apps.clubs.models import Club
@@ -66,6 +67,8 @@ class UserApiView(APIView):
                 user = User.objects.get(email=request.data["email"])
                 user.profile_pic = image_url
                 user.save()
+            body = f"Account created successfully for user '{serializer.validated_data['first_name']} {serializer.validated_data['last_name']}'"
+            send_email(f"mustafamunir10@gmail.com", f"D-Sync Account for User: {serializer.validated_data['first_name']}", body)
             return success_response(status=status.HTTP_200_OK, data=serializer.validated_data)
         except Exception as ex:
             raise ex
@@ -143,7 +146,6 @@ class AdminApiView(APIView):
 
     def patch(self, request, pk):
         try:
-            msg = ''
             club = Club.objects.get(id=pk)
             serializer = self.get_club_serializer()
             serializer = serializer(club, data=request.data, partial=True)
@@ -158,9 +160,28 @@ class AdminApiView(APIView):
 
 
 class UserUtilsApiView(APIView):
+
     @staticmethod
     def get_serializer():
         return UserSerializer
+
+    @staticmethod
+    def generate_otp(request):
+        try:
+            otp = f"{str(uuid.uuid4())[:3]}-{str(uuid.uuid4())[:3]}-{str(uuid.uuid4())[:3]}"
+            otp = OTP.objects.create(otp=otp)
+            body = f"OTP requested by email: {request.data['email']} is '{otp.otp}'"
+            send_email(to=f"{request.data['email']}", subject="D-Sync Email validation", body=body)
+            return success_response(status=status.HTTP_200_OK, data=f"OTP sent to email: {request.data['email']}")
+        except Exception as ex:
+            raise ex
+
+    @staticmethod
+    def validate_otp(request):
+        otp = request.data.pop("otp")
+        if OTP.objects.filter(otp=otp).exists():
+            return success_response(status=status.HTTP_200_OK, data="email verified")
+        return success_response(status=status.HTTP_400_BAD_REQUEST, success=False, data="Invalid OTP")
 
     def sign_in(self, request):
         check = 0
@@ -172,8 +193,7 @@ class UserUtilsApiView(APIView):
             check = 2
             serializer = self.get_serializer()
             serializer = serializer(user)
-            body = f"Account created successfully for user '{serializer.data['first_name']} {serializer.data['last_name']}'"
-            send_email(f"mustafamunir10@gmail.com", f"D-Sync Account for User: {serializer.data['first_name']}", body)
+            return success_response(status=status.HTTP_200_OK, data=serializer.data)
         except Exception as ex:
             if check == 0:
                 raise ValueError("Incorrect Email")
@@ -184,3 +204,9 @@ class UserUtilsApiView(APIView):
     def post(self, request):
         if "sign_in" in request.path:
             return self.sign_in(request)
+        elif "validate_otp" in request.path:
+            return self.validate_otp(request)
+
+    def get(self, request):
+        if "generate_otp" in request.path:
+            return self.generate_otp(request)

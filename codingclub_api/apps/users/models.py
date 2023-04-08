@@ -25,3 +25,10 @@ class User(AbstractUser):
     def __str__(self):
         return f"{self.first_name} {self.last_name}-{self.username}"
 
+
+class OTP(models.Model):
+    objects = None
+    otp = models.CharField(max_length=11, null=False, blank=False)
+
+    def __str__(self):
+        return self.otp
