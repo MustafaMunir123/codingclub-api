@@ -1,0 +1,93 @@
+[
+{
+    "model": "clubs.category",
+    "pk": 1,
+    "fields": {
+        "tags": "AI"
+    }
+},
+{
+    "model": "clubs.category",
+    "pk": 2,
+    "fields": {
+        "tags": "NLP"
+    }
+},
+{
+    "model": "clubs.category",
+    "pk": 3,
+    "fields": {
+        "tags": "Machine Learning"
+    }
+},
+{
+    "model": "clubs.category",
+    "pk": 4,
+    "fields": {
+        "tags": "QA"
+    }
+},
+{
+    "model": "clubs.category",
+    "pk": 5,
+    "fields": {
+        "tags": "Web Development"
+    }
+},
+{
+    "model": "clubs.category",
+    "pk": 6,
+    "fields": {
+        "tags": "App Development"
+    }
+},
+{
+    "model": "clubs.category",
+    "pk": 7,
+    "fields": {
+        "tags": "Backend Engineering"
+    }
+},
+{
+    "model": "clubs.category",
+    "pk": 8,
+    "fields": {
+        "tags": "Computer Vision"
+    }
+},
+{
+    "model": "clubs.category",
+    "pk": 10,
+    "fields": {
+        "tags": "Robotics"
+    }
+},
+{
+    "model": "clubs.category",
+    "pk": 11,
+    "fields": {
+        "tags": "Game Development"
+    }
+},
+{
+    "model": "clubs.category",
+    "pk": 12,
+    "fields": {
+        "tags": "Data Science"
+    }
+},
+{
+    "model": "clubs.category",
+    "pk": 13,
+    "fields": {
+        "tags": "Entrepreneurship"
+    }
+},
+{
+    "model": "clubs.category",
+    "pk": 14,
+    "fields": {
+        "tags": "Coding"
+    }
+}
+]

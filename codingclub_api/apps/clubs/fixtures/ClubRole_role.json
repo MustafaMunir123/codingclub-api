@@ -1,0 +1,51 @@
+[
+{
+    "model": "clubs.clubrole",
+    "pk": 3,
+    "fields": {
+        "role": "Lead"
+    }
+},
+{
+    "model": "clubs.clubrole",
+    "pk": 4,
+    "fields": {
+        "role": "Member"
+    }
+},
+{
+    "model": "clubs.clubrole",
+    "pk": 5,
+    "fields": {
+        "role": "Co-Lead"
+    }
+},
+{
+    "model": "clubs.clubrole",
+    "pk": 6,
+    "fields": {
+        "role": "Director"
+    }
+},
+{
+    "model": "clubs.clubrole",
+    "pk": 7,
+    "fields": {
+        "role": "Co-Director"
+    }
+},
+{
+    "model": "clubs.clubrole",
+    "pk": 8,
+    "fields": {
+        "role": "Volunteer"
+    }
+},
+{
+    "model": "clubs.clubrole",
+    "pk": 9,
+    "fields": {
+        "role": "Manager"
+    }
+}
+]
