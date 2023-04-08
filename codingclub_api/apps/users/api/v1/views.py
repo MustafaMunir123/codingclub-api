@@ -140,9 +140,23 @@ class AdminApiView(APIView):
         elif "get_rejected_clubs" in request.path:
             return self.get_rejected_clubs()
 
-    def post(self, request):
-        if "user_acceptance" in request.path:
-            pass
+    def reject_club_request(self, request):
+        try:
+            club = Club.objects.get(id=request.data["id"])
+            club.rejected = True
+            club.save()
+            subject = f"Club Creation Request for {club.name}"
+            body = f"Club Creation request by user {request.data['lead_user']['first_name']} " \
+                   f"{request.data['lead_user']['last_name']} for {club.name} rejected because of " \
+                   f"following reason: \n {request.data['reason']}"
+            send_email(to=f"{request.data['lead_user']['email']}", subject=subject, body=body)
+            return success_response(status=status.HTTP_200_OK, data="Email response sent successfully")
+        except Exception as ex:
+            raise ex
+
+    def post(self, request, pk=None):
+        if "reject_club_request" in request.path:
+            return self.reject_club_request(request)
 
     def patch(self, request, pk):
         try:
