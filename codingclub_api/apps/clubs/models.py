@@ -1,6 +1,10 @@
 import uuid
 from django.db import models
 from codingclub_api.apps.users.models import User
+from codingclub_api.apps.clubs.enums import EventStatus
+from codingclub_api.apps.clubs.constants import EVENT_STATUS
+
+
 # Create your models here.
 
 
@@ -77,14 +81,25 @@ class ClubEvent(models.Model):
     of_club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name="of_club")
     start_date = models.DateField(default="2023-3-4")
     end_date = models.DateField(default="2023-3-4")
+    no_of_registrations = models.IntegerField(null=False, default=0, blank=False)
+    registration_status = models.CharField(max_length=20, null=False, default=EventStatus.UPCOMMING.value, choices=EVENT_STATUS)
+    registration_left = models.IntegerField(null=False, blank=False, default=0)
 
     def __str__(self):
         return f"{self.name}  {self.of_club}"
 
+# Deprecated
+# class EventGoing(models.Model):
+#     event = models.OneToOneField(ClubEvent, on_delete=models.CASCADE, related_name="event")
+#     going = models.ManyToManyField(User, related_name="going")
+#
+#     def __str__(self):
+#         return self.event
 
-class EventGoing(models.Model):
-    event = models.OneToOneField(ClubEvent, on_delete=models.CASCADE, related_name="event")
-    going = models.ManyToManyField(User, related_name="going")
 
-    def __str__(self):
-        return self.event
+class EventRegistrations(models.Model):
+    id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
+    of_event = models.ForeignKey(ClubEvent, on_delete=models.CASCADE, related_name="of_delete")
+    registration_for_user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="registration_for_user")
+    registering_user_email = models.CharField(max_length=30, null=False, blank=False)
+
