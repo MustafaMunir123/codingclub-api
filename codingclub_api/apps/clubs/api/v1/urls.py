@@ -20,4 +20,5 @@ urlpatterns = [
     path("v1/events/", ClubEventsApiView.as_view()),
 
     path("v1/clubs_by_user/<uuid:pk>", UserDashboardApiView.as_view()),
+    path("v1/club_events_by_user/<uuid:pk>", UserDashboardApiView.as_view())
 ]

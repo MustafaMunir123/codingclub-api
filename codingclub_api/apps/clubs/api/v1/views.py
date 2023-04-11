@@ -240,14 +240,38 @@ class UserDashboardApiView(APIView):
 
     @staticmethod
     def clubs_by_user(request, pk):
-        user = User.objects.get(user_id=pk)
-        club_members = ClubMember.objects.filter(user=user)
-        club_ids = [club.club.id for club in club_members]
-        clubs = Club.objects.filter(pk__in=club_ids)
-        serializer = ClubApiView.get_serializer()
-        serializer = serializer(clubs, many=True)
-        return success_response(status=status.HTTP_200_OK, data=serializer.data)
+        try:
+            user = User.objects.get(user_id=pk)
+            club_members = ClubMember.objects.filter(user=user)
+            club_ids = [club.club.id for club in club_members]
+            clubs = Club.objects.filter(pk__in=club_ids)
+            serializer = ClubApiView.get_serializer()
+            serializer = serializer(clubs, many=True)
+            return success_response(status=status.HTTP_200_OK, data=serializer.data)
+        except Exception as ex:
+            return ex
+
+    @staticmethod
+    def club_events_by_user(request,pk):
+        try:
+            user = User.objects.get(user_id=pk)
+            club_members = ClubMember.objects.filter(user=user)
+            club_ids = [club.club.id for club in club_members]
+            clubs = Club.objects.filter(pk__in=club_ids)
+            event_ids = []
+            for club in clubs:
+                events = ClubEvent.objects.filter(of_club=club)
+                for event in events:
+                    event_ids.append(event.id)
+            events = ClubEvent.objects.filter(pk__in=event_ids)
+            serializer = ClubEventsApiView.get_serializer()
+            serializer = serializer(events, many=True)
+            return success_response(status=status.HTTP_200_OK, data=serializer.data)
+        except Exception as ex:
+            raise ex
 
     def get(self, request, pk=None):
         if "clubs_by_user" in request.path:
             return self.clubs_by_user(request, pk)
+        elif "club_events_by_user" in request.path:
+            return self.club_events_by_user(request, pk)
