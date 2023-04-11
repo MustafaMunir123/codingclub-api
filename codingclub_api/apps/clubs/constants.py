@@ -12,5 +12,5 @@ CLUB_ROLES = (
 EVENT_STATUS = (
     ('Ongoing', EventStatus.ONGOING.value),
     ('Up-Coming', EventStatus.UPCOMMING.value),
-    ('Past', EventStatus.PAST.value)
+    ('Past', EventStatus.PREVIOUS.value)
 )

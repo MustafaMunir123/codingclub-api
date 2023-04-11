@@ -76,6 +76,9 @@ class ClubRule(models.Model):
 
 
 class ClubEvent(models.Model):
+    objects = None
+    id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
+    banner = models.CharField(max_length=400, null=False, blank=False)
     name = models.CharField(max_length=30, null=False, blank=False)
     description = models.CharField(max_length=200, null=False, blank=False)
     of_club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name="of_club")

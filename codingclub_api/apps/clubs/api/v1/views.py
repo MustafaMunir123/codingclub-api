@@ -1,24 +1,28 @@
 import ast
 from typing import Dict
+from datetime import datetime as dt
 from django.forms.models import model_to_dict
 from rest_framework.views import (
     APIView,
     status,
 )
 from codingclub_api.apps.utils import success_response
+from codingclub_api.apps.clubs.enums import EventStatus
 from codingclub_api.apps.clubs.models import (
     Club,
     Category,
     ClubDomain,
     ClubRole,
-    ClubMember
+    ClubMember,
+    ClubEvent
 )
 from codingclub_api.apps.clubs.api.v1.serializers import (
     ClubSerializer,
     ClubMemberSerializer,
     ClubDomainSerializer,
     CategorySerializer,
-    ClubRoleSerializer
+    ClubRoleSerializer,
+    ClubEventSerializer
 )
 from codingclub_api.apps.services import store_image_get_url
 from codingclub_api.apps.users.models import User
@@ -203,4 +207,47 @@ class ClubRoleApiView(APIView):
             raise ex
 
 
+class ClubEventsApiView(APIView):
+    @staticmethod
+    def get_serializer():
+        return ClubEventSerializer
 
+    def get(self, request):
+        events = ClubEvent.objects.all()
+        date_today = dt.today().date()
+        updated_events = []
+        for event in events:
+            if event.start_date <= date_today < event.end_date:
+                event.registration_status = EventStatus.ONGOING.value
+                event.save()
+                updated_events.append(event)
+                print(event.name)
+            elif date_today < event.start_date:
+                event.registration_status = EventStatus.UPCOMMING.value
+                event.save()
+                updated_events.append(event)
+            else:
+                event.registration_status = EventStatus.PREVIOUS.value
+                event.save()
+                updated_events.append(event)
+        serializer = self.get_serializer()
+        serializer = serializer(updated_events, many=True)
+
+        return success_response(status=status.HTTP_200_OK, data=serializer.data)
+
+
+class UserDashboardApiView(APIView):
+
+    @staticmethod
+    def clubs_by_user(request, pk):
+        user = User.objects.get(user_id=pk)
+        club_members = ClubMember.objects.filter(user=user)
+        club_ids = [club.club.id for club in club_members]
+        clubs = Club.objects.filter(pk__in=club_ids)
+        serializer = ClubApiView.get_serializer()
+        serializer = serializer(clubs, many=True)
+        return success_response(status=status.HTTP_200_OK, data=serializer.data)
+
+    def get(self, request, pk=None):
+        if "clubs_by_user" in request.path:
+            return self.clubs_by_user(request, pk)

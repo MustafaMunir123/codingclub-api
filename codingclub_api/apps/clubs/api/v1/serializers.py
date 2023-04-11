@@ -82,3 +82,14 @@ class ClubMemberSerializer(serializers.Serializer):
         club_member = ClubMember.objects.create(**validated_data)
         return club_member
 
+
+class ClubEventSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    name = serializers.CharField(max_length=30, allow_null=False, allow_blank=False)
+    description = serializers.CharField(max_length=200, allow_null=False, allow_blank=False)
+    of_club = ClubSerializer(read_only=True, many=False)
+    start_date = serializers.DateField(allow_null=False)
+    end_date = serializers.DateField(allow_null=False)
+    no_of_registrations = serializers.IntegerField(allow_null=False, default=0)
+    registration_status = serializers.CharField(max_length=20, allow_null=False)
+    registration_left = serializers.IntegerField(allow_null=False, default=0)
