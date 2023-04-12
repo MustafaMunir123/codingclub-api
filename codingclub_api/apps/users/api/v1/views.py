@@ -8,6 +8,7 @@ from codingclub_api.apps.services import (
     store_image_get_url,
     delete_image_from_url
 )
+from codingclub_api.apps.utils import CacheUtils
 from codingclub_api.apps.users.constants import PROFILE_PIC_ICON
 from codingclub_api.apps.clubs.models import Club
 from codingclub_api.apps.users.api.v1.serializers import UserSerializer
@@ -64,18 +65,18 @@ class UserApiView(APIView):
     def post(self, request):
         try:
             image_file = ''
-            if "profile_pic" in request.data:
-                if request.data['profile_pic'] != '':
-                    image_file = request.data.pop("profile_pic")
+            # if "profile_pic" in request.data:
+            #     if request.data['profile_pic'] != '':
+            #         image_file = request.data.pop("profile_pic")
             serializer = self.get_serializer()
-            serializer = serializer(data=request.data)
+            serializer = serializer(data=request)
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            if image_file:
-                image_url = store_image_get_url(image_file[0], "profile_pic/")
-                user = User.objects.get(email=request.data["email"])
-                user.profile_pic = image_url
-                user.save()
+            # if image_file:
+            #     image_url = store_image_get_url(image_file[0], "profile_pic/")
+            #     user = User.objects.get(email=request.data["email"])
+            #     user.profile_pic = image_url
+            #     user.save()
             body = f"Account created successfully for user '{serializer.validated_data['first_name']} {serializer.validated_data['last_name']}'"
             send_email(f"mustafamunir10@gmail.com",
                        f"D-Sync Account for User: {serializer.validated_data['first_name']}", body)
@@ -87,9 +88,10 @@ class UserApiView(APIView):
         try:
             user = User.objects.get(user_id=pk)
             serializer = self.get_serializer()
-            if request.data['profile_pic'] != '':
-                profile_pic = request.data.pop('profile_pic')
-                request.data['profile_pic'] = self.update_and_delete_pic(picture=profile_pic, old_url=user.profile_pic)
+            if 'profile_pic' in request.data:
+                if request.data['profile_pic'] != '':
+                    profile_pic = request.data.pop('profile_pic')
+                    request.data['profile_pic'] = self.update_and_delete_pic(picture=profile_pic, old_url=user.profile_pic)
             serializer = serializer(user, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -249,10 +251,11 @@ class UserUtilsApiView(APIView):
     @staticmethod
     def generate_otp(request):
         try:
+            CacheUtils.set_cache(cache_key=request.data["email"], data=request.data)
             otp = f"{str(uuid.uuid4())[:3]}-{str(uuid.uuid4())[:3]}-{str(uuid.uuid4())[:3]}"
             otp = OTP.objects.create(otp=otp)
-            body = f"OTP requested by email: {request.data['email']} is '{otp.otp}'"
-            send_email(to=f"{request.data['email']}", subject="D-Sync Email validation", body=body)
+            body = f"<html><body><h2>OTP requested by email: {request.data['email']} is '{otp.otp}'</h2></body></html>"
+            send_email(to=f"mustafamunir10@gmail.com", subject="D-Sync OTP validation", body=body)
             return success_response(status=status.HTTP_200_OK, data=f"OTP sent to email: {request.data['email']}")
         except Exception as ex:
             raise ex
@@ -261,7 +264,8 @@ class UserUtilsApiView(APIView):
     def validate_otp(request):
         otp = request.data.pop("otp")
         if OTP.objects.filter(otp=otp).exists():
-            return success_response(status=status.HTTP_200_OK, data="email verified")
+            cached_data = CacheUtils.get_cache(cache_key=request.data["email"])
+            return UserApiView.post(self=UserApiView(), request=cached_data)
         return success_response(status=status.HTTP_400_BAD_REQUEST, success=False, data="Invalid OTP")
 
     def sign_in(self, request):
