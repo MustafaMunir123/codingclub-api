@@ -7,7 +7,6 @@ from codingclub_api.apps.clubs.models import(
     ClubEvent,
     ClubRole,
     ClubDomain,
-    EventGoing
 )
 
 # Register your models here.
@@ -19,4 +18,4 @@ admin.site.register(ClubRule)
 admin.site.register(ClubEvent)
 admin.site.register(ClubRole)
 admin.site.register(ClubDomain)
-admin.site.register(EventGoing)
+# admin.site.register(EventGoing)

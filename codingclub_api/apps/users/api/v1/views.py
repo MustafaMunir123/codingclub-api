@@ -4,11 +4,19 @@ from rest_framework.views import APIView
 from rest_framework import status
 from codingclub_api.apps.users.models import User, OTP
 from codingclub_api.apps.email_service import send_email
-from codingclub_api.apps.services import (store_image_get_url, delete_image_from_url)
+from codingclub_api.apps.services import (
+    store_image_get_url,
+    delete_image_from_url
+)
 from codingclub_api.apps.users.constants import PROFILE_PIC_ICON
 from codingclub_api.apps.clubs.models import Club
 from codingclub_api.apps.users.api.v1.serializers import UserSerializer
-from codingclub_api.apps.clubs.api.v1.serializers import ClubSerializer
+from codingclub_api.apps.clubs.api.v1.serializers import (
+    ClubSerializer,
+    CategorySerializer,
+    ClubDomainSerializer,
+    ClubRoleSerializer,
+)
 from rest_framework.permissions import (IsAuthenticated, BasePermission)
 from codingclub_api.apps.utils import success_response
 
@@ -56,8 +64,9 @@ class UserApiView(APIView):
     def post(self, request):
         try:
             image_file = ''
-            if request.data['profile_pic'] != '':
-                image_file = request.data.pop("profile_pic")
+            if "profile_pic" in request.data:
+                if request.data['profile_pic'] != '':
+                    image_file = request.data.pop("profile_pic")
             serializer = self.get_serializer()
             serializer = serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
@@ -68,7 +77,8 @@ class UserApiView(APIView):
                 user.profile_pic = image_url
                 user.save()
             body = f"Account created successfully for user '{serializer.validated_data['first_name']} {serializer.validated_data['last_name']}'"
-            send_email(f"mustafamunir10@gmail.com", f"D-Sync Account for User: {serializer.validated_data['first_name']}", body)
+            send_email(f"mustafamunir10@gmail.com",
+                       f"D-Sync Account for User: {serializer.validated_data['first_name']}", body)
             return success_response(status=status.HTTP_200_OK, data=serializer.validated_data)
         except Exception as ex:
             raise ex
@@ -108,6 +118,18 @@ class AdminApiView(APIView):
     def get_club_serializer():
         return ClubSerializer
 
+    @staticmethod
+    def get_category_serializer():
+        return CategorySerializer
+
+    @staticmethod
+    def get_domain_serializer():
+        return ClubDomainSerializer
+
+    @staticmethod
+    def get_role_serializer():
+        return ClubRoleSerializer
+
     def get_club_requests(self):
         try:
             club_data = Club.objects.filter(is_accepted=False, rejected=False)
@@ -132,6 +154,18 @@ class AdminApiView(APIView):
         serializer = serializer(users, many=True)
         return success_response(status=status.HTTP_200_OK, data=serializer.data)
 
+    @staticmethod
+    def accept_club_request(request):
+        try:
+            club = Club.objects.get(id=request.data["id"])
+            club.is_accepted = True
+            club.save()
+            body = f"Congratulations your club request for club {request.data['name']} has been approved by D-Sync team"
+            send_email(to=f"{request.data['lead_user']['email']}", subject="D-Sync: Club Request Approved", body=body)
+            return success_response(status=status.HTTP_200_OK, data="Club successfully approved")
+        except Exception as ex:
+            raise ex
+
     def get(self, request):
         if "get_club_requests" in request.path:
             return self.get_club_requests()
@@ -139,24 +173,71 @@ class AdminApiView(APIView):
             return self.get_admin_users()
         elif "get_rejected_clubs" in request.path:
             return self.get_rejected_clubs()
+        elif "accept_club_request" in request.path:
+            return self.accept_club_request(request)
 
-    def post(self, request):
-        if "user_acceptance" in request.path:
-            pass
-
-    def patch(self, request, pk):
+    @staticmethod
+    def reject_club_request(request):
         try:
-            club = Club.objects.get(id=pk)
-            serializer = self.get_club_serializer()
-            serializer = serializer(club, data=request.data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            msg = f"Club '{club.name}' registered successfully"
-            if "rejected" in serializer.validated_data:
-                msg = f"Club creation request rejected for {club.name}"
-            return success_response(status=status.HTTP_200_OK, data=msg)
+            club = Club.objects.get(id=request.data["id"])
+            club.rejected = True
+            club.save()
+            subject = f"Club Creation Request for {club.name}"
+            body = f"Club Creation request by user {request.data['lead_user']['first_name']} " \
+                   f"{request.data['lead_user']['last_name']} for {club.name} rejected because of " \
+                   f"following reason: \n {request.data['reason']}"
+            send_email(to=f"{request.data['lead_user']['email']}", subject=subject, body=body)
+            return success_response(status=status.HTTP_200_OK, data="Email response sent successfully")
         except Exception as ex:
             raise ex
+
+    def create_admin_user(self, request):
+        admin_check = {"is_admin": True}
+        print(request.data)
+        request.data.update(admin_check)
+        return UserApiView.post(self=self, request=request)
+
+    def add_category(self, request):
+        try:
+            serializer = self.get_category_serializer()
+            serializer = serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return success_response(status=status.HTTP_200_OK, data=serializer.validated_data)
+        except Exception as ex:
+            raise ex
+
+    def add_domain(self, request):
+        try:
+            serializer = self.get_domain_serializer()
+            serializer = serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return success_response(status=status.HTTP_200_OK, data=serializer.validated_data)
+        except Exception as ex:
+            raise ex
+
+    def add_role(self, request):
+        try:
+            serializer = self.get_role_serializer()
+            serializer = serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return success_response(status=status.HTTP_200_OK, data=serializer.validated_data)
+        except Exception as ex:
+            raise ex
+
+    def post(self, request, pk=None):
+        if "reject_club_request" in request.path:
+            return self.reject_club_request(request)
+        elif "create_admin_user" in request.path:
+            return self.create_admin_user(request)
+        elif "add_category" in request.path:
+            return self.add_category(request)
+        elif "add_role" in request.path:
+            return self.add_role(request)
+        elif "add_domain" in request.path:
+            return self.add_domain(request)
 
 
 class UserUtilsApiView(APIView):

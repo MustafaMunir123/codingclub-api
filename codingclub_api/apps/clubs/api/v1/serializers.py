@@ -1,5 +1,11 @@
 from rest_framework import serializers
-from codingclub_api.apps.clubs.models import Club, ClubMember
+from codingclub_api.apps.clubs.models import (
+    Club,
+    ClubMember,
+    Category,
+    ClubDomain,
+    ClubRole
+)
 from codingclub_api.apps.users.models import User
 from codingclub_api.apps.users.api.v1.serializers import UserSerializer
 
@@ -7,13 +13,25 @@ from codingclub_api.apps.users.api.v1.serializers import UserSerializer
 class CategorySerializer(serializers.Serializer):
     tags = serializers.CharField(max_length=40)
 
+    def create(self, validated_data):
+        category = Category.objects.create(**validated_data)
+        return category
+
 
 class ClubRoleSerializer(serializers.Serializer):
     role = serializers.CharField(max_length=40)
 
+    def create(self, validated_data):
+        role = ClubRole.objects.create(**validated_data)
+        return role
+
 
 class ClubDomainSerializer(serializers.Serializer):
     domain = serializers.CharField(max_length=40)
+
+    def create(self, validated_data):
+        domain = ClubDomain.objects.create(**validated_data)
+        return domain
 
 
 class ClubSerializer(serializers.Serializer):
@@ -52,6 +70,8 @@ class ClubMemberSerializer(serializers.Serializer):
     so it is actually querying back to club & user model and getting its instance 
     
     e.g. ClubMember.objects.user_id
+    
+    NOTE: use of serializers.CharField() is must instead of serializer class 
     """
     club_id = serializers.CharField(max_length=40, allow_null=True)
     is_accepted = serializers.BooleanField(default=False)
@@ -64,3 +84,14 @@ class ClubMemberSerializer(serializers.Serializer):
         club_member = ClubMember.objects.create(**validated_data)
         return club_member
 
+
+class ClubEventSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    name = serializers.CharField(max_length=30, allow_null=False, allow_blank=False)
+    description = serializers.CharField(max_length=200, allow_null=False, allow_blank=False)
+    of_club = ClubSerializer(read_only=True, many=False)
+    start_date = serializers.DateField(allow_null=False)
+    end_date = serializers.DateField(allow_null=False)
+    no_of_registrations = serializers.IntegerField(allow_null=False, default=0)
+    registration_status = serializers.CharField(max_length=20, allow_null=False)
+    registration_left = serializers.IntegerField(allow_null=False, default=0)
