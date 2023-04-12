@@ -70,6 +70,8 @@ class ClubMemberSerializer(serializers.Serializer):
     so it is actually querying back to club & user model and getting its instance 
     
     e.g. ClubMember.objects.user_id
+    
+    NOTE: use of serializers.CharField() is must instead of serializer class 
     """
     club_id = serializers.CharField(max_length=40, allow_null=True)
     is_accepted = serializers.BooleanField(default=False)

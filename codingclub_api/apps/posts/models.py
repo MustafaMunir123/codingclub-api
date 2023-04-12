@@ -8,8 +8,9 @@ from codingclub_api.apps.clubs.models import Category
 
 
 class Post(models.Model):
-    id = models.UUIDField(default=uuid.uuid4, editable=False, null=False, primary_key=True)
-    title = models.CharField(max_length=60, null=False, blank=False)
+    objects = None
+    id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
+    title = models.CharField(max_length=60, null=False, blank=False, unique=True)
     description = models.CharField(max_length=60, null=False, blank=False)
     banner = models.CharField(max_length=400, null=False, blank=False)
     like = models.IntegerField(default=0, null=False, blank=False)
@@ -19,7 +20,7 @@ class Post(models.Model):
     rejected = models.BooleanField(null=False, default=False)
 
     def __str__(self):
-        return f"{self.title} by {self.author.name}"
+        return f"{self.title} by {self.author.first_name}"
 
 
 class Comment(models.Model):

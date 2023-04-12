@@ -6,6 +6,7 @@ from rest_framework.views import (
     APIView,
     status,
 )
+from codingclub_api.apps.services import convert_to_id
 from codingclub_api.apps.utils import success_response
 from codingclub_api.apps.clubs.enums import EventStatus
 from codingclub_api.apps.clubs.models import (
@@ -35,20 +36,6 @@ class ClubApiView(APIView):
         obj = model.objects.get(name=unique_param)
         validate_data['id'] = obj.id
         return
-
-    @staticmethod
-    def convert_to_id(dictionary_list: Dict, ManyToManyModel):
-        objects_id = []
-        for key, value in dictionary_list.items():
-            objects_id = []
-            print(key,value)
-            dictionary_list = ast.literal_eval(value)
-            for obj in dictionary_list:
-                kwargs = {key: obj}
-                print(kwargs)
-                obj = ManyToManyModel.objects.get(**kwargs)
-                objects_id.append(obj.id)
-        return objects_id
 
     @staticmethod
     def add_roles(roles_list, pk):
@@ -114,11 +101,11 @@ class ClubApiView(APIView):
             self.set_id(Club, serializer.validated_data['name'], serializer.validated_data)
 
             club = Club.objects.get(id=serializer.validated_data["id"])
-            category_list = self.convert_to_id(dictionary_list=category, ManyToManyModel=Category)
+            category_list = convert_to_id(dictionary_list=category, ManyToManyModel=Category)
             club.category.add(*category_list)
-            domain_list = self.convert_to_id(dictionary_list=domain, ManyToManyModel=ClubDomain)
+            domain_list = convert_to_id(dictionary_list=domain, ManyToManyModel=ClubDomain)
             club.domain.add(*domain_list)
-            role_list = self.convert_to_id(dictionary_list=role, ManyToManyModel=ClubRole)
+            role_list = convert_to_id(dictionary_list=role, ManyToManyModel=ClubRole)
             club.role.add(*role_list)
             club.save()
             return success_response(status=status.HTTP_200_OK, data=club_data)
