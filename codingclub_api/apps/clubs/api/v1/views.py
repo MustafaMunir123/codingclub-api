@@ -9,6 +9,8 @@ from rest_framework.views import (
 from codingclub_api.apps.services import convert_to_id
 from codingclub_api.apps.utils import success_response
 from codingclub_api.apps.clubs.enums import EventStatus
+from codingclub_api.apps.posts.models import Post
+from codingclub_api.apps.posts.api.v1.serializers import PostSerializer
 from codingclub_api.apps.clubs.models import (
     Club,
     Category,
@@ -257,8 +259,20 @@ class UserDashboardApiView(APIView):
         except Exception as ex:
             raise ex
 
+    @staticmethod
+    def user_posts(request, pk):
+        try:
+            user = User.objects.get(user_id=pk)
+            posts = Post.objects.filter(author=user)
+            serializer = PostSerializer(posts, many=True)
+            return success_response(status=status.HTTP_200_OK, data=serializer.data)
+        except Exception as ex:
+            raise ex
+
     def get(self, request, pk=None):
         if "clubs_by_user" in request.path:
             return self.clubs_by_user(request, pk)
         elif "club_events_by_user" in request.path:
             return self.club_events_by_user(request, pk)
+        elif "user_posts" in request.path:
+            return self.user_posts(request, pk)
