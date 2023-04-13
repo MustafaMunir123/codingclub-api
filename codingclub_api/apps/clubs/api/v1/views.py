@@ -62,7 +62,6 @@ class ClubApiView(APIView):
         club.category.add(*domains)
         club.save()
 
-
     @staticmethod
     def get_serializer():
         return ClubSerializer
@@ -71,10 +70,10 @@ class ClubApiView(APIView):
         try:
             serializer = self.get_serializer()
             if pk is not None:
-                queryset = Club.objects.get(id=pk)
+                queryset = Club.objects.get(id=pk, is_accepted=True)
                 serializer = serializer(queryset)
                 return success_response(status=status.HTTP_200_OK, data=serializer.data)
-            queryset = Club.objects.all()
+            queryset = Club.objects.filter(is_accepted=True)
             serializer = serializer(queryset, many=True)
             return success_response(status=status.HTTP_200_OK, data=serializer.data)
         except Exception as ex:
@@ -134,13 +133,15 @@ class ClubMemberApiView(APIView):
             user, club = User.objects.get(user_id=user_id), Club.objects.get(id=club_id)
             if user.is_lead:
                 lead_club = Club.objects.get(lead_user=user)
-                return success_response(status=status.HTTP_400_BAD_REQUEST, success=False, data=f"User with email: {user.email} is leading  {lead_club.name}, so user cannot join any other clubs.")
+                return success_response(status=status.HTTP_400_BAD_REQUEST, success=False,
+                                        data=f"User with email: {user.email} is leading  {lead_club.name}, so user cannot join any other clubs.")
 
             member_of_clubs = ClubMember.objects.filter(user=user)
             for club_member in member_of_clubs:
                 if club_member.club == club:
                     # TODO: implement failure_response
-                    return success_response(status=status.HTTP_400_BAD_REQUEST, success=False, data=f"Already a part of {club}")
+                    return success_response(status=status.HTTP_400_BAD_REQUEST, success=False,
+                                            data=f"Already a part of {club}")
 
             serializer = self.get_serializer()
             serializer = serializer(data=request.data)
@@ -232,7 +233,7 @@ class UserDashboardApiView(APIView):
             return ex
 
     @staticmethod
-    def club_events_by_user(request,pk):
+    def club_events_by_user(request, pk):
         try:
             user = User.objects.get(user_id=pk)
             club_members = ClubMember.objects.filter(user=user)

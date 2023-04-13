@@ -26,7 +26,6 @@ class PostApiView(APIView):
     def post(self, request):
         try:
             banner = request.data.pop('banner')
-            print(type(request.data["tag"]))
             category = {'tags': request.data.pop("tag")[0]}
             request.data["banner"] = store_image_get_url(image_file=banner[0], path="posts/banner/")
             serializer = self.get_serializer()
@@ -47,12 +46,29 @@ class PostApiView(APIView):
     def get(self, request, pk=None):
         serializer = self.get_serializer()
         if pk is not None:
-            post = Post.objects.get(id=pk)
+            post = Post.objects.get(id=pk, is_accepted=True)
             serializer = serializer(post)
             print(post)
             return success_response(status=status.HTTP_200_OK, data=serializer.data)
-        posts = Post.objects.all()
+        posts = Post.objects.filter(is_accepted=True)
         serializer = serializer(posts, many=True)
         return success_response(status=status.HTTP_200_OK, data=serializer.data)
+
+
+class PostLikeApiView(APIView):
+    @staticmethod
+    def like(request, pk):
+        try:
+            post = Post.objects.get(id=pk)
+            post.like += 1
+            post.save()
+            serializer = PostSerializer(post)
+            return success_response(status=status.HTTP_200_OK, data=serializer.data)
+        except Exception as ex:
+            raise ex
+
+    def post(self, request, pk=None):
+        if "like" in request.path:
+            return self.like(request, pk)
 
 
