@@ -1,6 +1,7 @@
 import ast
 from typing import Dict
 from datetime import datetime as dt
+from django.db.models import Q
 from django.forms.models import model_to_dict
 from rest_framework.views import (
     APIView,
@@ -268,3 +269,47 @@ class UserDashboardApiView(APIView):
             return self.club_events_by_user(request, pk)
         elif "user_posts" in request.path:
             return self.user_posts(request, pk)
+
+
+class ClubDashboardApiView(APIView):
+    @staticmethod
+    def events(request, pk):
+        try:
+            club = Club.objects.get(id=pk)
+            events = ClubEvent.objects.filter(of_club=club)
+            serializer = ClubEventsApiView.get_serializer()
+            serializer = serializer(events, many=True)
+            return success_response(status=status.HTTP_200_OK, data=serializer.data)
+        except Exception as ex:
+            raise ex
+
+    @staticmethod
+    def members(request, pk):
+        try:
+            club = Club.objects.get(is_accepted=True, id=pk)
+            members = ClubMember.objects.filter(club=club, is_accepted=True)
+            serializer = ClubMemberApiView.get_serializer()
+            serializer = serializer(members, many=True)
+            return success_response(status=status.HTTP_200_OK, data=serializer.data)
+        except Exception as ex:
+            raise ex
+
+    @staticmethod
+    def member_request(request, pk):
+        try:
+            club = Club.objects.get(is_accepted=True, id=pk)
+            print(club)
+            members = ClubMember.objects.filter(club=club, is_accepted=False)
+            serializer = ClubMemberApiView.get_serializer()
+            serializer = serializer(members, many=True)
+            return success_response(status=status.HTTP_200_OK, data=serializer.data)
+        except Exception as ex:
+            raise ex
+
+    def get(self, request, pk=None):
+        if "events" in request.path:
+            return self.events(request, pk)
+        elif "members" in request.path:
+            return self.members(request, pk)
+        elif "member_request" in request.path:
+            return self.member_request(request, pk)

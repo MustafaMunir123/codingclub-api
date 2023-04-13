@@ -6,7 +6,8 @@ from codingclub_api.apps.clubs.api.v1.views import (
     CategoryApiView,
     ClubRoleApiView,
     ClubEventsApiView,
-    UserDashboardApiView
+    UserDashboardApiView,
+    ClubDashboardApiView
 )
 
 urlpatterns = [
@@ -22,5 +23,9 @@ urlpatterns = [
 
     path("v1/clubs_by_user/<uuid:pk>", UserDashboardApiView.as_view()),
     path("v1/club_events_by_user/<uuid:pk>", UserDashboardApiView.as_view()),
-    path("v1/user_posts/<uuid:pk>", UserDashboardApiView.as_view())
+    path("v1/user_posts/<uuid:pk>", UserDashboardApiView.as_view()),
+
+    path("v1/club/events/<uuid:pk>", ClubDashboardApiView.as_view()),
+    path("v1/club/members/<uuid:pk>", ClubDashboardApiView.as_view()),
+    path("v1/club/member_request/<uuid:pk>", ClubDashboardApiView.as_view()),
 ]
