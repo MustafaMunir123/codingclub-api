@@ -1,7 +1,6 @@
 import ast
 from typing import Dict
 from datetime import datetime as dt
-from django.db.models import Q
 from django.forms.models import model_to_dict
 from rest_framework.views import (
     APIView,
@@ -19,7 +18,8 @@ from codingclub_api.apps.clubs.models import (
     ClubDomain,
     ClubRole,
     ClubMember,
-    ClubEvent
+    ClubEvent,
+    EventRegistration
 )
 from codingclub_api.apps.clubs.api.v1.serializers import (
     ClubSerializer,
@@ -27,7 +27,8 @@ from codingclub_api.apps.clubs.api.v1.serializers import (
     ClubDomainSerializer,
     CategorySerializer,
     ClubRoleSerializer,
-    ClubEventSerializer
+    ClubEventSerializer,
+    EventRegistrationSerializer
 )
 from codingclub_api.apps.services import store_image_get_url
 from codingclub_api.apps.users.models import User
@@ -306,6 +307,22 @@ class ClubDashboardApiView(APIView):
         except Exception as ex:
             raise ex
 
+    @staticmethod
+    def registrations(request, pk):
+        try:
+            club = Club.objects.get(is_accepted=True, id=pk)
+            events = ClubEvent.objects.filter(of_club=club)
+            registrations = []
+            for event in events:
+                registrations_of_event = EventRegistration.objects.filter(of_event=event)
+                registrations.extend(registrations_of_event)
+            serializer = EventRegistrationSerializer
+            # TODO: import EventRegistrationSerializer from EventRegistrationApiView.get_serializer()
+            serializer = serializer(registrations, many=True)
+            return success_response(status=status.HTTP_200_OK, data=serializer.data)
+        except Exception as ex:
+            raise ex
+
     def get(self, request, pk=None):
         if "events" in request.path:
             return self.events(request, pk)
@@ -313,3 +330,5 @@ class ClubDashboardApiView(APIView):
             return self.members(request, pk)
         elif "member_request" in request.path:
             return self.member_request(request, pk)
+        elif "registrations" in request.path:
+            return self.registrations(request, pk)
