@@ -2,6 +2,7 @@ from django.core.exceptions import ObjectDoesNotExist, FieldError
 from django.db import IntegrityError, OperationalError
 from rest_framework import status
 from typing import Any
+from django.core.cache import cache
 from rest_framework.views import Response, exception_handler
 
 
@@ -34,3 +35,18 @@ def error_response(error_msg):
         {"success": False, "error": error_msg},
         status=status.HTTP_400_BAD_REQUEST,
     )
+
+
+class CacheUtils:
+    @staticmethod
+    def set_cache(cache_key, data) -> None:
+        cache.set(cache_key, data)
+
+    @staticmethod
+    def get_cache(cache_key) -> Any:
+        cached_data = cache.get(cache_key)
+        return cached_data
+
+    @staticmethod
+    def delete_cache():
+        cache.clear()

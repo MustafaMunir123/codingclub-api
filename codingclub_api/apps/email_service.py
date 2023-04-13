@@ -1,7 +1,7 @@
 import os
 from postmark import PMMail
-from django.conf import settings
 from dotenv import load_dotenv
+# from django.conf import settings
 
 load_dotenv("config/.env")
 
@@ -9,15 +9,17 @@ POSTMARK_API_KEY = os.getenv("POSTMARK_API_KEY")
 
 
 def send_email(to, subject, body):
-    print(POSTMARK_API_KEY)
+    try:
+        print(POSTMARK_API_KEY)
 
-    mail = PMMail(api_key=POSTMARK_API_KEY,
-                  subject=subject,
-                  sender="munir4303324@cloud.neduet.edu.pk",
-                  to=to,
-                  text_body=body)
-    mail.send()
-
+        mail = PMMail(api_key=POSTMARK_API_KEY,
+                      subject=subject,
+                      sender="munir4303324@cloud.neduet.edu.pk",
+                      to=to,
+                      text_body=body)
+        mail.send()
+    except Exception as ex:
+        ValueError(f"Error: {ex}")
 
 
 # from __future__ import print_function

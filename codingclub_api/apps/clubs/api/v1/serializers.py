@@ -95,3 +95,10 @@ class ClubEventSerializer(serializers.Serializer):
     no_of_registrations = serializers.IntegerField(allow_null=False, default=0)
     registration_status = serializers.CharField(max_length=20, allow_null=False)
     registration_left = serializers.IntegerField(allow_null=False, default=0)
+
+
+class EventRegistrationSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    of_event = ClubEventSerializer(read_only=True)
+    registration_for_user = UserSerializer(read_only=True)
+    registering_user_email = serializers.EmailField(max_length=30, allow_null=False, allow_blank=False)

@@ -100,9 +100,12 @@ class ClubEvent(models.Model):
 #         return self.event
 
 
-class EventRegistrations(models.Model):
+class EventRegistration(models.Model):
+    objects = None
     id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
     of_event = models.ForeignKey(ClubEvent, on_delete=models.CASCADE, related_name="of_delete")
-    registration_for_user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="registration_for_user")
-    registering_user_email = models.CharField(max_length=30, null=False, blank=False)
+    registration_for_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="registration_for_user")
+    registering_user_email = models.EmailField(max_length=30, null=False, blank=False)
 
+    def __str__(self):
+        return f"{self.of_event} {self.registration_for_user}"
