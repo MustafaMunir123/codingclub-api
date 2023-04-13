@@ -5,6 +5,7 @@ from codingclub_api.apps.clubs.api.v1.serializers import CategorySerializer
 
 
 class PostSerializer(serializers.Serializer):
+    id = serializers.UUIDField(read_only=True)
     title = serializers.CharField(max_length=60, allow_null=False, allow_blank=False)
     description = serializers.CharField(max_length=60, allow_null=False, allow_blank=False)
     banner = serializers.CharField(max_length=400, allow_null=False, allow_blank=False)

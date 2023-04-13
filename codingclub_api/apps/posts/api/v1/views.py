@@ -43,3 +43,16 @@ class PostApiView(APIView):
             return success_response(status=status.HTTP_200_OK, data=serializer.validated_data)
         except Exception as ex:
             raise ex
+
+    def get(self, request, pk=None):
+        serializer = self.get_serializer()
+        if pk is not None:
+            post = Post.objects.get(id=pk)
+            serializer = serializer(post)
+            print(post)
+            return success_response(status=status.HTTP_200_OK, data=serializer.data)
+        posts = Post.objects.all()
+        serializer = serializer(posts, many=True)
+        return success_response(status=status.HTTP_200_OK, data=serializer.data)
+
+
