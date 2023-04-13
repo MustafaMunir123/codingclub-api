@@ -1,66 +1,40 @@
-import ast
 from datetime import datetime as dt
-from codingclub_api.apps.typings import SuccessResponse
-from rest_framework.views import (
-    APIView,
-    status,
-)
-from codingclub_api.apps.services import convert_to_id
-from codingclub_api.apps.utils import success_response
-from codingclub_api.apps.posts.models import Post
-from codingclub_api.apps.clubs.api.v1.services import update_event_status
-from codingclub_api.apps.posts.api.v1.serializers import PostSerializer
-from codingclub_api.apps.clubs.models import (
-    Club,
-    Category,
-    ClubDomain,
-    ClubRole,
-    ClubMember,
-    ClubEvent,
-    EventRegistration,
-)
+
+from rest_framework.views import APIView, status
+
 from codingclub_api.apps.clubs.api.v1.serializers import (
-    ClubSerializer,
-    ClubMemberSerializer,
-    ClubDomainSerializer,
     CategorySerializer,
-    ClubRoleSerializer,
+    ClubDomainSerializer,
     ClubEventSerializer,
+    ClubMemberSerializer,
+    ClubRoleSerializer,
+    ClubSerializer,
     EventRegistrationSerializer,
 )
-from codingclub_api.apps.services import store_image_get_url
-from codingclub_api.apps.users.models import User
+from codingclub_api.apps.clubs.api.v1.services import update_event_status
+from codingclub_api.apps.clubs.models import (
+    Category,
+    Club,
+    ClubDomain,
+    ClubEvent,
+    ClubMember,
+    ClubRole,
+    EventRegistration,
+)
+from codingclub_api.apps.posts.api.v1.serializers import PostSerializer
+from codingclub_api.apps.posts.models import Post
+from codingclub_api.apps.services import convert_to_id, store_image_get_url
+from codingclub_api.apps.typings import SuccessResponse
 from codingclub_api.apps.users.api.v1.serializers import UserSerializer
+from codingclub_api.apps.users.models import User
+from codingclub_api.apps.utils import success_response
 
 
 class ClubApiView(APIView):
     @staticmethod
-    def set_id(model, unique_param, validate_data):
+    def set_id(model, unique_param, validate_data) -> None:
         obj = model.objects.get(name=unique_param)
         validate_data["id"] = obj.id
-        return
-
-    @staticmethod
-    def add_roles(roles_list, pk) -> SuccessResponse:
-        roles = []
-        roles_list = ast.literal_eval(roles_list)
-        for role in roles_list:
-            role = ClubRole.objects.get(role=role)
-            roles.append(role.id)
-        club = Club.objects.get(id=pk)
-        club.category.add(*roles)
-        club.save()
-
-    @staticmethod
-    def add_domains(domains_list, pk) -> SuccessResponse:
-        domains = []
-        domains_list = ast.literal_eval(domains_list)
-        for domain in domains_list:
-            domain = Category.objects.get(tags=domain)
-            domains.append(domain.id)
-        club = Club.objects.get(id=pk)
-        club.category.add(*domains)
-        club.save()
 
     @staticmethod
     def get_serializer():
@@ -142,7 +116,8 @@ class ClubMemberApiView(APIView):
                 return success_response(
                     status=status.HTTP_400_BAD_REQUEST,
                     success=False,
-                    data=f"User with email: {user.email} is leading  {lead_club.name}, so user cannot join any other clubs.",
+                    data=f"User with email: {user.email} is leading  {lead_club.name},"
+                    f" so user cannot join any other clubs.",
                 )
 
             member_of_clubs = ClubMember.objects.filter(user=user)
