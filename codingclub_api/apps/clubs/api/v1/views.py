@@ -10,6 +10,7 @@ from codingclub_api.apps.services import convert_to_id
 from codingclub_api.apps.utils import success_response
 from codingclub_api.apps.clubs.enums import EventStatus
 from codingclub_api.apps.posts.models import Post
+from codingclub_api.apps.clubs.api.v1.services import update_event_status
 from codingclub_api.apps.posts.api.v1.serializers import PostSerializer
 from codingclub_api.apps.clubs.models import (
     Club,
@@ -201,27 +202,17 @@ class ClubEventsApiView(APIView):
     def get_serializer():
         return ClubEventSerializer
 
-    def get(self, request):
-        events = ClubEvent.objects.all()
+    def get(self, request, pk=None):
         date_today = dt.today().date()
-        updated_events = []
-        for event in events:
-            if event.start_date <= date_today < event.end_date:
-                event.registration_status = EventStatus.ONGOING.value
-                event.save()
-                updated_events.append(event)
-                print(event.name)
-            elif date_today < event.start_date:
-                event.registration_status = EventStatus.UPCOMMING.value
-                event.save()
-                updated_events.append(event)
-            else:
-                event.registration_status = EventStatus.PREVIOUS.value
-                event.save()
-                updated_events.append(event)
         serializer = self.get_serializer()
+        if pk is not None:
+            event = ClubEvent.objects.filter(id=pk)
+            updated_event = update_event_status(events=event, date_today=date_today)
+            serializer = serializer(updated_event, many=True)
+            return success_response(status=status.HTTP_200_OK, data=serializer.data)
+        events = ClubEvent.objects.all()
+        updated_events = update_event_status(events=events, date_today=date_today)
         serializer = serializer(updated_events, many=True)
-
         return success_response(status=status.HTTP_200_OK, data=serializer.data)
 
 
