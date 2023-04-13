@@ -6,7 +6,8 @@ from codingclub_api.apps.users.models import User, OTP
 from codingclub_api.apps.email_service import send_email
 from codingclub_api.apps.services import (
     store_image_get_url,
-    delete_image_from_url
+    delete_image_from_url,
+    format_image_url
 )
 from codingclub_api.apps.utils import CacheUtils
 from codingclub_api.apps.users.constants import PROFILE_PIC_ICON
@@ -43,8 +44,10 @@ class UserApiView(APIView):
     @staticmethod
     def update_and_delete_pic(picture, old_url):
         if old_url != PROFILE_PIC_ICON:
-            path = old_url.split('.com/o/', 1)[1].replace('%2F', '/').replace('%20', ' ')
-            path = path.split('?alt')[0]
+            path = format_image_url(url=old_url)
+            # Deprecated
+            # path = old_url.split('.com/o/', 1)[1].replace('%2F', '/').replace('%20', ' ')
+            # path = path.split('?alt')[0]
             delete_image_from_url(path)
         image_url = store_image_get_url(picture[0], "profile_pic/")
         return image_url
@@ -103,6 +106,8 @@ class UserApiView(APIView):
     def delete(request, pk):
         try:
             user = User.objects.get(user_id=pk)
+            url_path = format_image_url(user.profile_pic)
+            delete_image_from_url(url_path=url_path)
             email = user.email
             user.delete()
             return success_response(status=status.HTTP_200_OK, data=f"User deleted succesfully with email {email}")
