@@ -4,9 +4,8 @@ from codingclub_api.apps.clubs.models import (
     ClubMember,
     Category,
     ClubDomain,
-    ClubRole
+    ClubRole,
 )
-from codingclub_api.apps.users.models import User
 from codingclub_api.apps.users.api.v1.serializers import UserSerializer
 
 
@@ -62,16 +61,16 @@ class ClubMemberSerializer(serializers.Serializer):
     club = ClubSerializer(read_only=True)
     user_id = serializers.CharField(max_length=40, allow_null=True)
     """
-    This a really great way of getting foreign many to one data. We do not have user_id & club_id but on passing these 
-    with there will actually somehow query it automatically to get object. 
-    this is happening inside create method of serializer because i have set the related_name fields to: 
+    This a really great way of getting foreign many to one data. We do not have user_id & club_id but on passing these
+    with there will actually somehow query it automatically to get object.
+    this is happening inside create method of serializer because i have set the related_name fields to:
     club for club
     user of user
-    so it is actually querying back to club & user model and getting its instance 
-    
+    so it is actually querying back to club & user model and getting its instance
+
     e.g. ClubMember.objects.user_id
-    
-    NOTE: use of serializers.CharField() is must instead of serializer class 
+
+    NOTE: use of serializers.CharField() is must instead of serializer class
     """
     club_id = serializers.CharField(max_length=40, allow_null=True)
     is_accepted = serializers.BooleanField(default=False)
@@ -87,8 +86,11 @@ class ClubMemberSerializer(serializers.Serializer):
 
 class ClubEventSerializer(serializers.Serializer):
     id = serializers.UUIDField()
+    banner = serializers.CharField(max_length=400, allow_null=False, allow_blank=False)
     name = serializers.CharField(max_length=30, allow_null=False, allow_blank=False)
-    description = serializers.CharField(max_length=200, allow_null=False, allow_blank=False)
+    description = serializers.CharField(
+        max_length=200, allow_null=False, allow_blank=False
+    )
     of_club = ClubSerializer(read_only=True, many=False)
     start_date = serializers.DateField(allow_null=False)
     end_date = serializers.DateField(allow_null=False)
@@ -101,4 +103,6 @@ class EventRegistrationSerializer(serializers.Serializer):
     id = serializers.UUIDField()
     of_event = ClubEventSerializer(read_only=True)
     registration_for_user = UserSerializer(read_only=True)
-    registering_user_email = serializers.EmailField(max_length=30, allow_null=False, allow_blank=False)
+    registering_user_email = serializers.EmailField(
+        max_length=30, allow_null=False, allow_blank=False
+    )
