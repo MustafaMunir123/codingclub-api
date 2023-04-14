@@ -52,3 +52,9 @@ def structure_event(events):
         )
         sorted_years[year] = sorted_months
     return sorted_years
+
+
+def event_name_url(events: List) -> List:
+    return [
+        {"event_name": event["name"], "image_url": event["banner"]} for event in events
+    ]

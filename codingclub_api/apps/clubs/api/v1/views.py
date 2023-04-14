@@ -15,6 +15,7 @@ from codingclub_api.apps.clubs.api.v1.serializers import (
 from codingclub_api.apps.clubs.api.v1.services import (
     update_event_status,
     structure_event,
+    event_name_url,
 )
 from codingclub_api.apps.clubs.models import (
     Category,
@@ -342,3 +343,20 @@ class EventCalenderApiView(APIView):
     def get(self, request):
         if "events/calender" in request.path:
             return self.calender(request)
+
+
+class ImageGalleryApiView(APIView):
+    @staticmethod
+    def gallery(request):
+        try:
+            events = ClubEvent.objects.all()
+            serializer = ClubEventSerializer(events, many=True)
+            data = event_name_url(events=serializer.data)
+            print(data)
+            return success_response(status=status.HTTP_200_OK, data=data)
+        except Exception as ex:
+            raise ex
+
+    def get(self, request):
+        if "events/gallery" in request.path:
+            return self.gallery(request)
