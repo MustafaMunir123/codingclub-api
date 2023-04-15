@@ -42,9 +42,11 @@ class Club(models.Model):
     id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
     name = models.CharField(max_length=40, null=False, blank=False, unique=True)
     description = models.CharField(max_length=200, blank=False, null=False)
-    lead_user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="lead_user")
-    role = models.ManyToManyField(ClubRole, related_name='roles')
-    domain = models.ManyToManyField(ClubDomain, related_name='domains')
+    lead_user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="lead_user"
+    )
+    role = models.ManyToManyField(ClubRole, related_name="roles")
+    domain = models.ManyToManyField(ClubDomain, related_name="domains")
     category = models.ManyToManyField(Category, related_name="category")
     is_accepted = models.BooleanField(default=False, null=True)
     rejected = models.BooleanField(default=False, null=True)
@@ -85,11 +87,17 @@ class ClubEvent(models.Model):
     start_date = models.DateField(default="2023-3-4")
     end_date = models.DateField(default="2023-3-4")
     no_of_registrations = models.IntegerField(null=False, default=0, blank=False)
-    registration_status = models.CharField(max_length=20, null=False, default=EventStatus.UPCOMMING.value, choices=EVENT_STATUS)
+    registration_status = models.CharField(
+        max_length=20,
+        null=False,
+        default=EventStatus.UPCOMMING.value,
+        choices=EVENT_STATUS,
+    )
     registration_left = models.IntegerField(null=False, blank=False, default=0)
 
     def __str__(self):
         return f"{self.name}  {self.of_club}"
+
 
 # Deprecated
 # class EventGoing(models.Model):
@@ -103,8 +111,12 @@ class ClubEvent(models.Model):
 class EventRegistration(models.Model):
     objects = None
     id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
-    of_event = models.ForeignKey(ClubEvent, on_delete=models.CASCADE, related_name="of_delete")
-    registration_for_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="registration_for_user")
+    of_event = models.ForeignKey(
+        ClubEvent, on_delete=models.CASCADE, related_name="of_event"
+    )
+    registration_for_user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="registration_for_user"
+    )
     registering_user_email = models.EmailField(max_length=30, null=False, blank=False)
 
     def __str__(self):
