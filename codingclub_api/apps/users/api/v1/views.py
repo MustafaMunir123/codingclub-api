@@ -1,7 +1,8 @@
 import uuid
 
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+
+# from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
 from codingclub_api.apps.clubs.api.v1.serializers import (
@@ -21,14 +22,15 @@ from codingclub_api.apps.typings import SuccessResponse
 from codingclub_api.apps.users.api.v1.serializers import UserSerializer
 from codingclub_api.apps.users.constants import PROFILE_PIC_ICON
 from codingclub_api.apps.users.models import OTP, User
-from codingclub_api.apps.users.permissions import IsSuperAdmin
+
+# from codingclub_api.apps.users.permissions import IsSuperAdmin
 from codingclub_api.apps.utils import CacheUtils, success_response
 
 # Create your views here.
 
 
 class UserApiView(APIView):
-    permission_classes = [IsAuthenticated, IsSuperAdmin]
+    # permission_classes = [IsAuthenticated, IsSuperAdmin]
 
     @staticmethod
     def get_serializer():

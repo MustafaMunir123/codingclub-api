@@ -10,6 +10,7 @@ from codingclub_api.apps.clubs.api.v1.views import (
     ClubDashboardApiView,
     EventCalenderApiView,
     ImageGalleryApiView,
+    EventRegistrationApiView,
 )
 
 urlpatterns = [
@@ -34,4 +35,5 @@ urlpatterns = [
     path("v1/club/registrations/<uuid:pk>", ClubDashboardApiView.as_view()),
     path("v1/events/calender/", EventCalenderApiView.as_view()),
     path("v1/events/gallery/", ImageGalleryApiView.as_view()),
+    path("v1/events/register/", EventRegistrationApiView.as_view()),
 ]

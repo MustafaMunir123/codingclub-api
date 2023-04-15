@@ -5,6 +5,7 @@ from codingclub_api.apps.clubs.models import (
     Category,
     ClubDomain,
     ClubRole,
+    EventRegistration,
 )
 from codingclub_api.apps.users.api.v1.serializers import UserSerializer
 
@@ -100,9 +101,15 @@ class ClubEventSerializer(serializers.Serializer):
 
 
 class EventRegistrationSerializer(serializers.Serializer):
-    id = serializers.UUIDField()
+    id = serializers.UUIDField(read_only=True)
     of_event = ClubEventSerializer(read_only=True)
+    of_event_id = serializers.UUIDField()
     registration_for_user = UserSerializer(read_only=True)
+    registration_for_user_id = serializers.UUIDField()
     registering_user_email = serializers.EmailField(
         max_length=30, allow_null=False, allow_blank=False
     )
+
+    def create(self, validated_data):
+        event_registration = EventRegistration.objects.create(**validated_data)
+        return event_registration

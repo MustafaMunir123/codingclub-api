@@ -1,8 +1,11 @@
 import datetime
-from typing import List, Dict
+from typing import List, Dict, Any
 from datetime import datetime as dt
 from codingclub_api.apps.enums import Date
+from codingclub_api.apps.email_service import send_email
 from codingclub_api.apps.clubs.enums import EventStatus
+from codingclub_api.apps.users.models import User
+from codingclub_api.apps.clubs.models import ClubEvent, EventRegistration
 
 
 def update_event_status(events: List, date_today):
@@ -58,3 +61,42 @@ def event_name_url(events: List) -> List:
     return [
         {"event_name": event["name"], "image_url": event["banner"]} for event in events
     ]
+
+
+class EventRegistrationService:
+    @staticmethod
+    def email_to_all(registrations):
+        for registration in registrations:
+            pass
+
+    @staticmethod
+    def structure_registrations(registrations) -> Any:
+        registrations_json = []
+        errors = []
+        event = ClubEvent.objects.get(id=registrations["of_event_id"])
+        for no_of_registration in range(len(registrations["registration_for_user"])):
+            user = User.objects.get(
+                email=registrations["registration_for_user"][no_of_registration]
+            )
+            if EventRegistration.objects.filter(
+                registration_for_user=user, of_event=event
+            ).exists():
+                errors.append(f"{user.first_name} {user.last_name}")
+            else:
+                registrations_json.append(
+                    {
+                        "of_event_id": registrations["of_event_id"],
+                        "registration_for_user_id": user.user_id,
+                        "registering_user_email": registrations[
+                            "registering_user_email"
+                        ],
+                    }
+                )
+                body = (
+                    f"Event registration successful for user: {user.first_name} {user.last_name} \n"
+                    f"Registering user email: {registrations['registering_user_email']}"
+                )
+                send_email(
+                    to=user.email, subject=f"Registration for event {event}", body=body
+                )
+        return registrations_json, errors

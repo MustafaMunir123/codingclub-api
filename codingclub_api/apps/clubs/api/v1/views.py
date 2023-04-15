@@ -16,6 +16,7 @@ from codingclub_api.apps.clubs.api.v1.services import (
     update_event_status,
     structure_event,
     event_name_url,
+    EventRegistrationService,
 )
 from codingclub_api.apps.clubs.models import (
     Category,
@@ -210,6 +211,10 @@ class ClubEventsApiView(APIView):
         serializer = serializer(updated_events, many=True)
         return success_response(status=status.HTTP_200_OK, data=serializer.data)
 
+    def post(self, request):
+        pass
+        # TODO: create event API
+
 
 class UserDashboardApiView(APIView):
     @staticmethod
@@ -360,3 +365,27 @@ class ImageGalleryApiView(APIView):
     def get(self, request):
         if "events/gallery" in request.path:
             return self.gallery(request)
+
+
+class EventRegistrationApiView(APIView):
+    @staticmethod
+    def get_serializer():
+        return EventRegistrationSerializer
+
+    def post(self, request):
+        try:
+            data, errors = EventRegistrationService.structure_registrations(
+                request.data
+            )
+            if errors:
+                raise ValueError(f"Registration already exists for user: {errors}")
+            serializer = self.get_serializer()
+            serializer = serializer(data=data, many=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            print(serializer.validated_data)
+            return success_response(
+                status=status.HTTP_200_OK, data=serializer.validated_data
+            )
+        except Exception as ex:
+            raise ex
