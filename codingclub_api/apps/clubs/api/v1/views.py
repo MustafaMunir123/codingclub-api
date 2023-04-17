@@ -163,6 +163,18 @@ class ClubDomainsApiView(APIView):
         except Exception as ex:
             raise ex
 
+    def post(self, request):
+        try:
+            serializer = self.get_serializer()
+            serializer = serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return success_response(
+                status=status.HTTP_200_OK, data=serializer.validated_data
+            )
+        except Exception as ex:
+            raise ex
+
 
 class CategoryApiView(APIView):
     @staticmethod
@@ -178,6 +190,18 @@ class CategoryApiView(APIView):
         except Exception as ex:
             raise ex
 
+    def post(self, request):
+        try:
+            serializer = self.get_serializer()
+            serializer = serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return success_response(
+                status=status.HTTP_200_OK, data=serializer.validated_data
+            )
+        except Exception as ex:
+            raise ex
+
 
 class ClubRoleApiView(APIView):
     @staticmethod
@@ -190,6 +214,18 @@ class ClubRoleApiView(APIView):
             serializer = self.get_serializer()
             serializer = serializer(roles, many=True)
             return success_response(status=status.HTTP_200_OK, data=serializer.data)
+        except Exception as ex:
+            raise ex
+
+    def post(self, request):
+        try:
+            serializer = self.get_serializer()
+            serializer = serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return success_response(
+                status=status.HTTP_200_OK, data=serializer.validated_data
+            )
         except Exception as ex:
             raise ex
 
