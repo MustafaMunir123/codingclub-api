@@ -358,6 +358,26 @@ class ClubDashboardApiView(APIView):
         except Exception as ex:
             raise ex
 
+    @staticmethod
+    def domains_by_clubs(request, pk):
+        try:
+            club = Club.objects.get(id=pk)
+            club_domains = club.domain.all()
+            serializer = ClubDomainSerializer(club_domains, many=True)
+            return success_response(status=status.HTTP_200_OK, data=serializer.data)
+        except Exception as ex:
+            raise ex
+
+    @staticmethod
+    def roles_by_clubs(request, pk):
+        try:
+            club = Club.objects.get(id=pk)
+            club_roles = club.role.all()
+            serializer = ClubRoleSerializer(club_roles, many=True)
+            return success_response(status=status.HTTP_200_OK, data=serializer.data)
+        except Exception as ex:
+            raise ex
+
     def get(self, request, pk=None):
         if "events" in request.path:
             return self.events(request, pk)
@@ -367,6 +387,10 @@ class ClubDashboardApiView(APIView):
             return self.member_request(request, pk)
         elif "registrations" in request.path:
             return self.registrations(request, pk)
+        elif "domains_by_clubs" in request.path:
+            return self.domains_by_clubs(request, pk)
+        elif "roles_by_clubs" in request.path:
+            return self.roles_by_clubs(request, pk)
 
     @staticmethod
     def contact_club(request):
