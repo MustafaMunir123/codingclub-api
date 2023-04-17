@@ -29,6 +29,7 @@ from codingclub_api.apps.clubs.models import (
 )
 from codingclub_api.apps.posts.api.v1.serializers import PostSerializer
 from codingclub_api.apps.posts.models import Post
+from codingclub_api.apps.email_service import send_email
 from codingclub_api.apps.services import convert_to_id, store_image_get_url
 from codingclub_api.apps.typings import SuccessResponse
 from codingclub_api.apps.users.api.v1.serializers import UserSerializer
@@ -162,6 +163,18 @@ class ClubDomainsApiView(APIView):
         except Exception as ex:
             raise ex
 
+    def post(self, request):
+        try:
+            serializer = self.get_serializer()
+            serializer = serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return success_response(
+                status=status.HTTP_200_OK, data=serializer.validated_data
+            )
+        except Exception as ex:
+            raise ex
+
 
 class CategoryApiView(APIView):
     @staticmethod
@@ -177,6 +190,18 @@ class CategoryApiView(APIView):
         except Exception as ex:
             raise ex
 
+    def post(self, request):
+        try:
+            serializer = self.get_serializer()
+            serializer = serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return success_response(
+                status=status.HTTP_200_OK, data=serializer.validated_data
+            )
+        except Exception as ex:
+            raise ex
+
 
 class ClubRoleApiView(APIView):
     @staticmethod
@@ -189,6 +214,18 @@ class ClubRoleApiView(APIView):
             serializer = self.get_serializer()
             serializer = serializer(roles, many=True)
             return success_response(status=status.HTTP_200_OK, data=serializer.data)
+        except Exception as ex:
+            raise ex
+
+    def post(self, request):
+        try:
+            serializer = self.get_serializer()
+            serializer = serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return success_response(
+                status=status.HTTP_200_OK, data=serializer.validated_data
+            )
         except Exception as ex:
             raise ex
 
@@ -321,6 +358,26 @@ class ClubDashboardApiView(APIView):
         except Exception as ex:
             raise ex
 
+    @staticmethod
+    def domains_by_clubs(request, pk):
+        try:
+            club = Club.objects.get(id=pk)
+            club_domains = club.domain.all()
+            serializer = ClubDomainSerializer(club_domains, many=True)
+            return success_response(status=status.HTTP_200_OK, data=serializer.data)
+        except Exception as ex:
+            raise ex
+
+    @staticmethod
+    def roles_by_clubs(request, pk):
+        try:
+            club = Club.objects.get(id=pk)
+            club_roles = club.role.all()
+            serializer = ClubRoleSerializer(club_roles, many=True)
+            return success_response(status=status.HTTP_200_OK, data=serializer.data)
+        except Exception as ex:
+            raise ex
+
     def get(self, request, pk=None):
         if "events" in request.path:
             return self.events(request, pk)
@@ -330,6 +387,26 @@ class ClubDashboardApiView(APIView):
             return self.member_request(request, pk)
         elif "registrations" in request.path:
             return self.registrations(request, pk)
+        elif "domains_by_clubs" in request.path:
+            return self.domains_by_clubs(request, pk)
+        elif "roles_by_clubs" in request.path:
+            return self.roles_by_clubs(request, pk)
+
+    @staticmethod
+    def contact_club(request):
+        try:
+            subject = "D-Sync: Someone's trying to contact through your club"
+            body = f"Some one with email {request.data['email']} has following query:\n {request.data['query']}"
+            send_email(to=request.data.pop("lead_email"), subject=subject, body=body)
+            return success_response(
+                status=status.HTTP_200_OK, data="Email send to lead user"
+            )
+        except Exception as ex:
+            return ex
+
+    def post(self, request):
+        if "contact_club" in request.path:
+            return self.contact_club(request)
 
 
 class EventCalenderApiView(APIView):

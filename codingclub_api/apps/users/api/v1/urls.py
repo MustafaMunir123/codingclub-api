@@ -1,15 +1,22 @@
 from django.urls import path
-from codingclub_api.apps.users.api.v1.views import UserApiView, AdminApiView, UserUtilsApiView
+from codingclub_api.apps.users.api.v1.views import (
+    UserApiView,
+    AdminApiView,
+    UserUtilsApiView,
+    UserSignInApiView,
+)
 
 
 urlpatterns = [
     path("v1/user/", UserApiView.as_view()),
     path("v1/user/<uuid:pk>", UserApiView.as_view()),
-
-    path("v1/sign_in/", UserUtilsApiView.as_view()),
+    # Sign In
+    path("v1/sign_in/", UserSignInApiView.as_view()),
+    path("v1/si/forget_password/", UserSignInApiView.as_view()),
     path("v1/generate_otp/", UserUtilsApiView.as_view()),
-    path("v1/validate_otp/", UserUtilsApiView.as_view()),
-
+    # Sign Up
+    path("v1/signup/generate_otp/", UserUtilsApiView.as_view()),
+    path("v1/signup/validate_otp/", UserUtilsApiView.as_view()),
     path("v1/reject_club_request/", AdminApiView.as_view()),
     path("v1/accept_club_request/", AdminApiView.as_view()),
     path("v1/get_club_requests/", AdminApiView.as_view()),

@@ -26,6 +26,7 @@ from codingclub_api.apps.users.models import OTP, User
 # from codingclub_api.apps.users.permissions import IsSuperAdmin
 from codingclub_api.apps.utils import CacheUtils, success_response
 
+
 # Create your views here.
 
 
@@ -263,9 +264,7 @@ class AdminApiView(APIView):
 
 
 class UserUtilsApiView(APIView):
-    @staticmethod
-    def get_serializer():
-        return UserSerializer
+    # TODO: scale OTP generation and validation as methods using DRY approach
 
     @staticmethod
     def generate_otp(request) -> SuccessResponse:
@@ -273,7 +272,8 @@ class UserUtilsApiView(APIView):
             CacheUtils.set_cache(cache_key=request.data["email"], data=request.data)
             otp = f"{str(uuid.uuid4())[:3]}-{str(uuid.uuid4())[:3]}-{str(uuid.uuid4())[:3]}"
             otp = OTP.objects.create(otp=otp)
-            body = f"<html><body><h2>OTP requested by email: {request.data['email']} is '{otp.otp}'</h2></body></html>"
+            CacheUtils.set_cache(cache_key=otp, data=otp)
+            body = f"OTP requested by email: {request.data['email']} is '{otp.otp}'"
             send_email(
                 to="mustafamunir10@gmail.com",
                 subject="D-Sync OTP validation",
@@ -290,11 +290,30 @@ class UserUtilsApiView(APIView):
     def validate_otp(request) -> SuccessResponse:
         otp = request.data.pop("otp")
         if OTP.objects.filter(otp=otp).exists():
-            cached_data = CacheUtils.get_cache(cache_key=request.data["email"])
-            return UserApiView.post(self=UserApiView(), request=cached_data)
+            cached_otp = CacheUtils.get_cache(cache_key=otp)
+            if cached_otp:
+                cached_data = CacheUtils.get_cache(cache_key=request.data["email"])
+                return UserApiView.post(self=UserApiView(), request=cached_data)
+            return success_response(
+                status=status.HTTP_400_BAD_REQUEST, success=False, data="OTP Expired"
+            )
         return success_response(
             status=status.HTTP_400_BAD_REQUEST, success=False, data="Invalid OTP"
         )
+
+    def post(self, request) -> SuccessResponse:
+        if "validate_otp" in request.path:
+            return self.validate_otp(request)
+
+    def get(self, request) -> SuccessResponse:
+        if "generate_otp" in request.path:
+            return self.generate_otp(request)
+
+
+class UserSignInApiView(APIView):
+    @staticmethod
+    def get_serializer():
+        return UserSerializer
 
     def sign_in(self, request) -> SuccessResponse:
         check = 0
@@ -315,12 +334,28 @@ class UserUtilsApiView(APIView):
                 raise ValueError("Incorrect Password")
             raise ex
 
-    def post(self, request) -> SuccessResponse:
+    @staticmethod
+    def validate_otp(request) -> SuccessResponse:
+        otp = request.data.pop("otp")
+        if OTP.objects.filter(otp=otp).exists():
+            cached_otp = CacheUtils.get_cache(cache_key=otp)
+            if cached_otp:
+                cached_data = CacheUtils.get_cache(cache_key=request.data.pop("email"))
+                if cached_data:
+                    user = User.objects.get(email=cached_data["email"])
+                    return UserApiView.patch(
+                        self=UserApiView(), request=request, pk=user.user_id
+                    )
+                return UserApiView.post(self=UserApiView(), request=cached_data)
+            return success_response(
+                status=status.HTTP_400_BAD_REQUEST, success=False, data="OTP Expired"
+            )
+        return success_response(
+            status=status.HTTP_400_BAD_REQUEST, success=False, data="Invalid OTP"
+        )
+
+    def post(self, request):
         if "sign_in" in request.path:
             return self.sign_in(request)
-        elif "validate_otp" in request.path:
+        elif "forget_password" in request.path:
             return self.validate_otp(request)
-
-    def get(self, request) -> SuccessResponse:
-        if "generate_otp" in request.path:
-            return self.generate_otp(request)

@@ -11,7 +11,7 @@ class Post(models.Model):
     objects = None
     id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
     title = models.CharField(max_length=60, null=False, blank=False, unique=True)
-    description = models.CharField(max_length=60, null=False, blank=False)
+    description = models.CharField(max_length=1500, null=False, blank=False)
     banner = models.CharField(max_length=400, null=False, blank=False)
     like = models.IntegerField(default=0, null=False, blank=False)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="author")
@@ -24,10 +24,13 @@ class Post(models.Model):
 
 
 class Comment(models.Model):
-    id = models.UUIDField(default=uuid.uuid4, editable=False, null=False, primary_key=True)
+    id = models.UUIDField(
+        default=uuid.uuid4, editable=False, null=False, primary_key=True
+    )
     description = models.CharField(blank=True, max_length=50)
-    comment_author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comment_author")
+    comment_author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="comment_author"
+    )
 
     def __str__(self):
         return f"{str(self.description)[10]}... by {self.comment_author.name}"
-

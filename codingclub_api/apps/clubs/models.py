@@ -41,7 +41,7 @@ class Club(models.Model):
     banner = models.CharField(max_length=400, null=False, blank=False)
     id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
     name = models.CharField(max_length=40, null=False, blank=False, unique=True)
-    description = models.CharField(max_length=200, blank=False, null=False)
+    description = models.CharField(max_length=250, blank=False, null=False)
     lead_user = models.OneToOneField(
         User, on_delete=models.CASCADE, related_name="lead_user"
     )
