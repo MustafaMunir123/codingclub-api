@@ -29,6 +29,7 @@ from codingclub_api.apps.clubs.models import (
 )
 from codingclub_api.apps.posts.api.v1.serializers import PostSerializer
 from codingclub_api.apps.posts.models import Post
+from codingclub_api.apps.email_service import send_email
 from codingclub_api.apps.services import convert_to_id, store_image_get_url
 from codingclub_api.apps.typings import SuccessResponse
 from codingclub_api.apps.users.api.v1.serializers import UserSerializer
@@ -330,6 +331,22 @@ class ClubDashboardApiView(APIView):
             return self.member_request(request, pk)
         elif "registrations" in request.path:
             return self.registrations(request, pk)
+
+    @staticmethod
+    def contact_club(request):
+        try:
+            subject = "D-Sync: Someone's trying to contact through your club"
+            body = f"Some one with email {request.data['email']} has following query:\n {request.data['query']}"
+            send_email(to=request.data.pop("lead_email"), subject=subject, body=body)
+            return success_response(
+                status=status.HTTP_200_OK, data="Email send to lead user"
+            )
+        except Exception as ex:
+            return ex
+
+    def post(self, request):
+        if "contact_club" in request.path:
+            return self.contact_club(request)
 
 
 class EventCalenderApiView(APIView):
