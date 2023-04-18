@@ -34,7 +34,12 @@ from codingclub_api.apps.clubs.models import (
 from codingclub_api.apps.posts.api.v1.serializers import PostSerializer
 from codingclub_api.apps.posts.models import Post
 from codingclub_api.apps.email_service import send_email
-from codingclub_api.apps.services import convert_to_id, store_image_get_url
+from codingclub_api.apps.services import (
+    convert_to_id,
+    store_image_get_url,
+    format_image_url,
+    delete_image_from_url,
+)
 from codingclub_api.apps.typings import SuccessResponse
 from codingclub_api.apps.users.api.v1.serializers import UserSerializer
 from codingclub_api.apps.users.models import User
@@ -106,6 +111,44 @@ class ClubApiView(APIView):
             return success_response(status=status.HTTP_200_OK, data=club_data)
         except Exception as ex:
             raise ex
+
+    @staticmethod
+    def delete(request, pk):
+        try:
+            club = Club.objects.get(id=pk)
+            club.delete()
+            return success_response(
+                status=status.HTTP_200_OK, data="Deleted successfully"
+            )
+        except Exception as ex:
+            return ex
+
+    def patch(self, request, pk):
+        try:
+            club = Club.objects.get(id=pk)
+            if "logo" in request.data:
+                logo = request.data.pop("logo")
+                path = format_image_url(url=club.logo)
+                delete_image_from_url(url_path=path)
+                request.data["logo"] = store_image_get_url(
+                    image_file=logo[0], path="clubs/logo/"
+                )
+            if "banner" in request.data:
+                banner = request.data.pop("banner")
+                path = format_image_url(url=club.banner)
+                delete_image_from_url(url_path=path)
+                request.data["banner"] = store_image_get_url(
+                    image_file=banner[0], path="clubs/banner/"
+                )
+            serializer = self.get_serializer()
+            serializer = serializer(club, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return success_response(
+                status=status.HTTP_200_OK, data=serializer.validated_data
+            )
+        except Exception as ex:
+            return ex
 
     # TODO: Patch & Delete API for clubs
 
