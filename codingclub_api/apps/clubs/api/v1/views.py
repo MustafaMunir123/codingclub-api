@@ -2,6 +2,10 @@ from datetime import datetime as dt
 
 from rest_framework.views import APIView, status
 from codingclub_api.apps.clubs.enums import EventStatus
+from rest_framework.permissions import IsAuthenticated
+from codingclub_api.apps.users.permissions import IsAdmin
+from codingclub_api.apps.clubs.permissions import IsLeadNotGET, IsLead
+from codingclub_api.apps.posts.permissions import IsAuthenticatedNotGET
 
 from codingclub_api.apps.clubs.api.v1.serializers import (
     CategorySerializer,
@@ -38,6 +42,8 @@ from codingclub_api.apps.utils import success_response
 
 
 class ClubApiView(APIView):
+    permission_classes = [IsAuthenticatedNotGET]
+
     @staticmethod
     def set_id(model, unique_param, validate_data) -> None:
         obj = model.objects.get(name=unique_param)
@@ -101,8 +107,12 @@ class ClubApiView(APIView):
         except Exception as ex:
             raise ex
 
+    # TODO: Patch & Delete API for clubs
+
 
 class ClubMemberApiView(APIView):
+    permission_classes = [IsAuthenticated]
+
     @staticmethod
     def get_serializer():
         return ClubMemberSerializer
@@ -150,6 +160,8 @@ class ClubMemberApiView(APIView):
 
 
 class ClubDomainsApiView(APIView):
+    permission_classes = [IsAdmin]
+
     @staticmethod
     def get_serializer():
         return ClubDomainSerializer
@@ -177,6 +189,8 @@ class ClubDomainsApiView(APIView):
 
 
 class CategoryApiView(APIView):
+    permission_classes = [IsAdmin]
+
     @staticmethod
     def get_serializer():
         return CategorySerializer
@@ -204,6 +218,8 @@ class CategoryApiView(APIView):
 
 
 class ClubRoleApiView(APIView):
+    permission_classes = [IsAdmin]
+
     @staticmethod
     def get_serializer():
         return ClubRoleSerializer
@@ -231,6 +247,8 @@ class ClubRoleApiView(APIView):
 
 
 class ClubEventsApiView(APIView):
+    permission_classes = [IsAuthenticated, IsLeadNotGET]
+
     @staticmethod
     def get_serializer():
         return ClubEventSerializer
@@ -254,8 +272,10 @@ class ClubEventsApiView(APIView):
 
 
 class UserDashboardApiView(APIView):
+    permission_classes = [IsAuthenticated]
+
     @staticmethod
-    def clubs_by_user(request, pk) -> SuccessResponse:
+    def clubs_by_user(request, pk) -> SuccessResponse or Exception:
         try:
             user = User.objects.get(user_id=pk)
             club_members = ClubMember.objects.filter(user=user)
@@ -306,6 +326,8 @@ class UserDashboardApiView(APIView):
 
 
 class ClubDashboardApiView(APIView):
+    permission_classes = [IsAuthenticated, IsLead]
+
     @staticmethod
     def events(request, pk) -> SuccessResponse:
         try:
@@ -445,12 +467,15 @@ class ImageGalleryApiView(APIView):
 
 
 class EventRegistrationApiView(APIView):
+    permission_classes = [IsAuthenticated]
+
     @staticmethod
     def get_serializer():
         return EventRegistrationSerializer
 
     def post(self, request):
         try:
+            # TODO: Add a check service for event's seats
             data, errors = EventRegistrationService.structure_registrations(
                 request.data
             )
