@@ -150,8 +150,6 @@ class ClubApiView(APIView):
         except Exception as ex:
             return ex
 
-    # TODO: Patch & Delete API for clubs
-
 
 class ClubMemberApiView(APIView):
     permission_classes = [IsAuthenticated]
@@ -300,7 +298,7 @@ class ClubEventsApiView(APIView):
         date_today = dt.today().date()
         serializer = self.get_serializer()
         if pk is not None:
-            event = ClubEvent.objects.filter(id=pk)
+            event = ClubEvent.objects.filter(of_club=pk)
             updated_event = update_event_status(events=event, date_today=date_today)
             serializer = serializer(updated_event, many=True)
             return success_response(status=status.HTTP_200_OK, data=serializer.data)
@@ -416,8 +414,7 @@ class ClubDashboardApiView(APIView):
                     of_event=event
                 )
                 registrations.extend(registrations_of_event)
-            serializer = EventRegistrationSerializer
-            # TODO: import EventRegistrationSerializer from EventRegistrationApiView.get_serializer()
+            serializer = EventRegistrationApiView.get_serializer()
             serializer = serializer(registrations, many=True)
             return success_response(status=status.HTTP_200_OK, data=serializer.data)
         except Exception as ex:
@@ -519,11 +516,20 @@ class EventRegistrationApiView(APIView):
     def post(self, request):
         try:
             # TODO: Add a check service for event's seats
+            event = ClubEvent.objects.get(id=request.data["of_event_id"])
+            if EventRegistrationService.check_seats_limit(
+                registrations=request.data["registration_for_user"],
+                registered_seats=event.registrations_made,
+                total_seats=event.no_of_registrations,
+            ):
+                raise ValueError(f"Not enough seats left for event {event.name}")
             data, errors = EventRegistrationService.structure_registrations(
                 request.data
             )
             if errors:
                 raise ValueError(f"Registration already exists for user: {errors}")
+            event.registrations_made += len(data)
+            event.save()
             serializer = self.get_serializer()
             serializer = serializer(data=data, many=True)
             serializer.is_valid(raise_exception=True)

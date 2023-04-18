@@ -75,6 +75,15 @@ class EventRegistrationService:
         errors = []
         event = ClubEvent.objects.get(id=registrations["of_event_id"])
         for no_of_registration in range(len(registrations["registration_for_user"])):
+            # check if user exists or not
+            if not User.objects.filter(
+                email=registrations["registration_for_user"][no_of_registration]
+            ).exists():
+                raise ValueError(
+                    f"User with email {registrations['registration_for_user'][no_of_registration]} does not exists"
+                )
+
+            # Get user if it exists
             user = User.objects.get(
                 email=registrations["registration_for_user"][no_of_registration]
             )
@@ -100,3 +109,11 @@ class EventRegistrationService:
                     to=user.email, subject=f"Registration for event {event}", body=body
                 )
         return registrations_json, errors
+
+    @staticmethod
+    def check_seats_limit(
+        registrations: List, registered_seats: int, total_seats: int
+    ) -> bool:
+        if len(registrations) + registered_seats > total_seats:
+            return True
+        return False
