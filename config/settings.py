@@ -11,7 +11,9 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
-import os
+
+# import os
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -33,23 +35,25 @@ ALLOWED_HOSTS = []
 LOCAL_APPS = [
     "codingclub_api.apps.users",
     "codingclub_api.apps.clubs",
-    "codingclub_api.apps.posts"
+    "codingclub_api.apps.posts",
 ]
 
-THIRDPARTY_APPS = [
-    "phonenumber_field"
-]
+THIRDPARTY_APPS = ["phonenumber_field"]
 
-INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
-] + LOCAL_APPS + THIRDPARTY_APPS
+INSTALLED_APPS = (
+    [
+        "django.contrib.admin",
+        "django.contrib.auth",
+        "django.contrib.contenttypes",
+        "django.contrib.sessions",
+        "django.contrib.messages",
+        "django.contrib.staticfiles",
+    ]
+    + LOCAL_APPS
+    + THIRDPARTY_APPS
+)
 
-AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = "users.User"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -64,7 +68,9 @@ MIDDLEWARE = [
 ROOT_URLCONF = "config.urls"
 
 REST_FRAMEWORK = {
-    "EXCEPTION_HANDLER": "codingclub_api.apps.utils.custom_exception_handler"
+    "EXCEPTION_HANDLER": "codingclub_api.apps.utils.custom_exception_handler",
+    # 'DEFAULT_PERMISSION_CLASSES': (
+    #     'rest_framework.permissions.AllowAny', )
 }
 
 TEMPLATES = [
