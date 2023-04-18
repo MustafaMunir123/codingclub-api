@@ -1,8 +1,9 @@
 from rest_framework.views import APIView, status
-
+from rest_framework.permissions import IsAuthenticated
 from codingclub_api.apps.clubs.models import Category
 from codingclub_api.apps.posts.api.v1.serializers import PostSerializer
 from codingclub_api.apps.posts.models import Post
+from codingclub_api.apps.posts.permissions import IsAuthenticatedNotGET
 from codingclub_api.apps.services import convert_to_id, store_image_get_url
 from codingclub_api.apps.typings import SuccessResponse
 from codingclub_api.apps.utils import success_response
@@ -11,6 +12,8 @@ from codingclub_api.apps.utils import success_response
 
 
 class PostApiView(APIView):
+    permission_classes = [IsAuthenticatedNotGET]
+
     @staticmethod
     def set_id(model, unique_param, validate_data) -> None:
         obj = model.objects.get(title=unique_param)
@@ -63,6 +66,8 @@ class PostApiView(APIView):
 
 
 class PostLikeApiView(APIView):
+    permission_classes = [IsAuthenticated]
+
     @staticmethod
     def like(request, pk) -> SuccessResponse:
         try:
