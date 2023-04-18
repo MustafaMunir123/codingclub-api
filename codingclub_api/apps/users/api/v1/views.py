@@ -2,7 +2,7 @@ import uuid
 
 from rest_framework import status
 
-# from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
 from codingclub_api.apps.clubs.api.v1.serializers import (
@@ -23,7 +23,7 @@ from codingclub_api.apps.users.api.v1.serializers import UserSerializer
 from codingclub_api.apps.users.constants import PROFILE_PIC_ICON
 from codingclub_api.apps.users.models import OTP, User
 
-# from codingclub_api.apps.users.permissions import IsSuperAdmin
+from codingclub_api.apps.users.permissions import IsAdmin, IsAuthenticatedNotPOST
 from codingclub_api.apps.utils import CacheUtils, success_response
 
 
@@ -31,7 +31,7 @@ from codingclub_api.apps.utils import CacheUtils, success_response
 
 
 class UserApiView(APIView):
-    # permission_classes = [IsAuthenticated, IsSuperAdmin]
+    permission_classes = [IsAuthenticatedNotPOST]
 
     @staticmethod
     def get_serializer():
@@ -115,6 +115,8 @@ class UserApiView(APIView):
 
 
 class AdminApiView(APIView):
+    permission_classes = [IsAuthenticated, IsAdmin]
+
     @staticmethod
     def get_serializer():
         return UserSerializer
