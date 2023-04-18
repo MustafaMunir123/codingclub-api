@@ -1,6 +1,8 @@
 
 # codingclub-api
 
+## POSTMAN Documentation: https://web.postman.co/workspace/My-Workspace~50cdc6dd-a2ee-4ed7-8db9-3dbe49a15964/documentation/25186829-cff6057f-5afd-42ad-9d84-1e96be9c4110
+
 ### Getting started and running locally:
 
 
