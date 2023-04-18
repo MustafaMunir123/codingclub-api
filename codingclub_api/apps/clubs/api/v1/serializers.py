@@ -5,8 +5,10 @@ from codingclub_api.apps.clubs.models import (
     Category,
     ClubDomain,
     ClubRole,
+    ClubEvent,
     EventRegistration,
 )
+from codingclub_api.apps.clubs.enums import EventStatus
 from codingclub_api.apps.users.api.v1.serializers import UserSerializer
 
 
@@ -86,18 +88,29 @@ class ClubMemberSerializer(serializers.Serializer):
 
 
 class ClubEventSerializer(serializers.Serializer):
-    id = serializers.UUIDField()
+    id = serializers.UUIDField(read_only=True)
     banner = serializers.CharField(max_length=400, allow_null=False, allow_blank=False)
     name = serializers.CharField(max_length=30, allow_null=False, allow_blank=False)
     description = serializers.CharField(
         max_length=200, allow_null=False, allow_blank=False
     )
     of_club = ClubSerializer(read_only=True, many=False)
+    of_club_id = serializers.UUIDField()
     start_date = serializers.DateField(allow_null=False)
     end_date = serializers.DateField(allow_null=False)
     no_of_registrations = serializers.IntegerField(allow_null=False, default=0)
-    registration_status = serializers.CharField(max_length=20, allow_null=False)
-    registration_left = serializers.IntegerField(allow_null=False, default=0)
+    registration_status = serializers.CharField(
+        max_length=20, default=EventStatus.UPCOMMING.value
+    )
+    registrations_made = serializers.IntegerField(allow_null=False, default=0)
+
+    def create(self, validated_data):
+        event = ClubEvent.objects.create(**validated_data)
+        return event
+
+    def update(self, instance, validated_data):
+        event = ClubEvent.objects.filter(id=instance.id).update(**validated_data)
+        return event
 
 
 class EventRegistrationSerializer(serializers.Serializer):

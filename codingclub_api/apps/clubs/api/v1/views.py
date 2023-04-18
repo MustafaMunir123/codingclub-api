@@ -308,8 +308,41 @@ class ClubEventsApiView(APIView):
         return success_response(status=status.HTTP_200_OK, data=serializer.data)
 
     def post(self, request):
-        pass
-        # TODO: create event API
+        try:
+            if "banner" in request.data:
+                banner = request.data.pop("banner")
+                request.data["banner"] = store_image_get_url(
+                    image_file=banner[0], path="clubs/events/banner/"
+                )
+            serializer = self.get_serializer()
+            serializer = serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return success_response(
+                status=status.HTTP_200_OK, data=serializer.validated_data
+            )
+        except Exception as ex:
+            raise ex
+
+    def patch(self, request, pk):
+        try:
+            event = ClubEvent.objects.get(id=pk)
+            if "banner" in request.data:
+                banner = request.data.pop("banner")
+                path = format_image_url(url=event.banner)
+                delete_image_from_url(url_path=path)
+                request.data["banner"] = store_image_get_url(
+                    image_file=banner[0], path="clubs/events/banner/"
+                )
+            serializer = self.get_serializer()
+            serializer = serializer(event, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return success_response(
+                status=status.HTTP_200_OK, data=serializer.validated_data
+            )
+        except Exception as ex:
+            raise ex
 
 
 class UserDashboardApiView(APIView):
@@ -515,7 +548,6 @@ class EventRegistrationApiView(APIView):
 
     def post(self, request):
         try:
-            # TODO: Add a check service for event's seats
             event = ClubEvent.objects.get(id=request.data["of_event_id"])
             if EventRegistrationService.check_seats_limit(
                 registrations=request.data["registration_for_user"],
