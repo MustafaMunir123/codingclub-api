@@ -36,6 +36,7 @@ LOCAL_APPS = [
     "codingclub_api.apps.users",
     "codingclub_api.apps.clubs",
     "codingclub_api.apps.posts",
+    "codingclub_api.apps.competitions",
 ]
 
 THIRDPARTY_APPS = ["phonenumber_field"]
