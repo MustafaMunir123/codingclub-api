@@ -34,7 +34,12 @@ from codingclub_api.apps.clubs.models import (
 from codingclub_api.apps.posts.api.v1.serializers import PostSerializer
 from codingclub_api.apps.posts.models import Post
 from codingclub_api.apps.email_service import send_email
-from codingclub_api.apps.services import convert_to_id, store_image_get_url
+from codingclub_api.apps.services import (
+    convert_to_id,
+    store_image_get_url,
+    format_image_url,
+    delete_image_from_url,
+)
 from codingclub_api.apps.typings import SuccessResponse
 from codingclub_api.apps.users.api.v1.serializers import UserSerializer
 from codingclub_api.apps.users.models import User
@@ -107,7 +112,43 @@ class ClubApiView(APIView):
         except Exception as ex:
             raise ex
 
-    # TODO: Patch & Delete API for clubs
+    @staticmethod
+    def delete(request, pk):
+        try:
+            club = Club.objects.get(id=pk)
+            club.delete()
+            return success_response(
+                status=status.HTTP_200_OK, data="Deleted successfully"
+            )
+        except Exception as ex:
+            return ex
+
+    def patch(self, request, pk):
+        try:
+            club = Club.objects.get(id=pk)
+            if "logo" in request.data:
+                logo = request.data.pop("logo")
+                path = format_image_url(url=club.logo)
+                delete_image_from_url(url_path=path)
+                request.data["logo"] = store_image_get_url(
+                    image_file=logo[0], path="clubs/logo/"
+                )
+            if "banner" in request.data:
+                banner = request.data.pop("banner")
+                path = format_image_url(url=club.banner)
+                delete_image_from_url(url_path=path)
+                request.data["banner"] = store_image_get_url(
+                    image_file=banner[0], path="clubs/banner/"
+                )
+            serializer = self.get_serializer()
+            serializer = serializer(club, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return success_response(
+                status=status.HTTP_200_OK, data=serializer.validated_data
+            )
+        except Exception as ex:
+            return ex
 
 
 class ClubMemberApiView(APIView):
@@ -257,7 +298,7 @@ class ClubEventsApiView(APIView):
         date_today = dt.today().date()
         serializer = self.get_serializer()
         if pk is not None:
-            event = ClubEvent.objects.filter(id=pk)
+            event = ClubEvent.objects.filter(of_club=pk)
             updated_event = update_event_status(events=event, date_today=date_today)
             serializer = serializer(updated_event, many=True)
             return success_response(status=status.HTTP_200_OK, data=serializer.data)
@@ -267,8 +308,41 @@ class ClubEventsApiView(APIView):
         return success_response(status=status.HTTP_200_OK, data=serializer.data)
 
     def post(self, request):
-        pass
-        # TODO: create event API
+        try:
+            if "banner" in request.data:
+                banner = request.data.pop("banner")
+                request.data["banner"] = store_image_get_url(
+                    image_file=banner[0], path="clubs/events/banner/"
+                )
+            serializer = self.get_serializer()
+            serializer = serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return success_response(
+                status=status.HTTP_200_OK, data=serializer.validated_data
+            )
+        except Exception as ex:
+            raise ex
+
+    def patch(self, request, pk):
+        try:
+            event = ClubEvent.objects.get(id=pk)
+            if "banner" in request.data:
+                banner = request.data.pop("banner")
+                path = format_image_url(url=event.banner)
+                delete_image_from_url(url_path=path)
+                request.data["banner"] = store_image_get_url(
+                    image_file=banner[0], path="clubs/events/banner/"
+                )
+            serializer = self.get_serializer()
+            serializer = serializer(event, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return success_response(
+                status=status.HTTP_200_OK, data=serializer.validated_data
+            )
+        except Exception as ex:
+            raise ex
 
 
 class UserDashboardApiView(APIView):
@@ -373,8 +447,7 @@ class ClubDashboardApiView(APIView):
                     of_event=event
                 )
                 registrations.extend(registrations_of_event)
-            serializer = EventRegistrationSerializer
-            # TODO: import EventRegistrationSerializer from EventRegistrationApiView.get_serializer()
+            serializer = EventRegistrationApiView.get_serializer()
             serializer = serializer(registrations, many=True)
             return success_response(status=status.HTTP_200_OK, data=serializer.data)
         except Exception as ex:
@@ -475,12 +548,20 @@ class EventRegistrationApiView(APIView):
 
     def post(self, request):
         try:
-            # TODO: Add a check service for event's seats
+            event = ClubEvent.objects.get(id=request.data["of_event_id"])
+            if EventRegistrationService.check_seats_limit(
+                registrations=request.data["registration_for_user"],
+                registered_seats=event.registrations_made,
+                total_seats=event.no_of_registrations,
+            ):
+                raise ValueError(f"Not enough seats left for event {event.name}")
             data, errors = EventRegistrationService.structure_registrations(
                 request.data
             )
             if errors:
                 raise ValueError(f"Registration already exists for user: {errors}")
+            event.registrations_made += len(data)
+            event.save()
             serializer = self.get_serializer()
             serializer = serializer(data=data, many=True)
             serializer.is_valid(raise_exception=True)

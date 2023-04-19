@@ -93,7 +93,12 @@ class ClubEvent(models.Model):
         default=EventStatus.UPCOMMING.value,
         choices=EVENT_STATUS,
     )
-    registration_left = models.IntegerField(null=False, blank=False, default=0)
+    registrations_made = models.IntegerField(
+        null=False,
+        blank=False,
+        default=0,
+        help_text="No of registrations that have been made i.e. 32/40",
+    )
 
     def __str__(self):
         return f"{self.name}  {self.of_club}"

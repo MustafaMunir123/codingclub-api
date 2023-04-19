@@ -24,12 +24,13 @@ urlpatterns = [
     path("v1/domains/", ClubDomainsApiView.as_view()),
     path("v1/categories/", CategoryApiView.as_view()),
     path("v1/roles/", ClubRoleApiView.as_view()),
+    # Club Events
     path("v1/events/", ClubEventsApiView.as_view()),
     path("v1/events/<uuid:pk>", ClubEventsApiView.as_view()),
+    # Club Dashboard
     path("v1/clubs_by_user/<uuid:pk>", UserDashboardApiView.as_view()),
     path("v1/club_events_by_user/<uuid:pk>", UserDashboardApiView.as_view()),
     path("v1/user_posts/<uuid:pk>", UserDashboardApiView.as_view()),
-    # Club Dashboard
     path("v1/club/events/<uuid:pk>", ClubDashboardApiView.as_view()),
     path("v1/club/members/<uuid:pk>", ClubDashboardApiView.as_view()),
     path("v1/club/member_request/<uuid:pk>", ClubDashboardApiView.as_view()),
