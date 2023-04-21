@@ -23,8 +23,12 @@ Set remote origin
 ```bash
   git remote add origin https://github.com/MustafaMunir123/codingclub-api.git
 ```
+------------If above command does not work, then run---------------
+```bash
+  git pull https://github.com/MustafaMunir123/codingclub-api.git master
+```
+-----------------------Otherwise-----------------------
 
-Take latest pull of master branch
 ```bash
   git pull origin master
 ```
