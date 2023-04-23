@@ -1,8 +1,10 @@
 import os
 import uuid
+import json
 
 import pyrebase
-import ast
+
+# import ast
 from dotenv import load_dotenv
 from typing import Dict
 
@@ -10,7 +12,9 @@ from typing import Dict
 load_dotenv("config/.env")
 
 # getting config str-dict and convert it into dict type using ast.literal_eval
-config = ast.literal_eval(os.getenv("REALTIME_DB_CONFIG"))
+RTDB = os.getenv("REALTIME_DB_CONFIG")
+# config = ast.literal_eval(os.getenv("REALTIME_DB_CONFIG"))
+config = json.loads(RTDB)
 email = os.getenv("FB_EMAIL")
 password = os.getenv("FB_PASSWORD")
 
