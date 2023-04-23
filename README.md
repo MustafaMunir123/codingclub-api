@@ -2,7 +2,7 @@
 # codingclub-api
 
 ## POSTMAN Documentation: https://documenter.getpostman.com/view/25186829/2s93Xzy3LF
-
+Python 3.10.6
 ### Getting started and running locally:
 
 
