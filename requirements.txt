@@ -142,3 +142,4 @@ wrapt==1.15.0
 python-postmark==0.6.0
 typed-ast==1.5.4
 python-dotenv~=1.0.0
+gunicorn==20.1.0
