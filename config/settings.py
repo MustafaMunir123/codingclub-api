@@ -27,8 +27,7 @@ SECRET_KEY = "django-insecure-1yqaa-rwr@vr27%u53q(r%g2hs+ut=dzlqofon39vs(bgeo@ui
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -90,7 +89,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "config.wsgi.application"
+# edited
+WSGI_APPLICATION = "config.wsgi.app"
 
 
 # Database
